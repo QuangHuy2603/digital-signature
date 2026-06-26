@@ -152,30 +152,7 @@ Offline verification ready
 
 Reason code thành công: `VALID_PADES_LT`.
 
-## 12. Checklist trước demo
-
-```text
-[ ] Node.js hoạt động
-[ ] OpenSSL hoạt động
-[ ] SoftHSM hoạt động
-[ ] OpenSC hoạt động
-[ ] SOFTHSM2_CONF đúng
-[ ] Token NT219-TSP tồn tại
-[ ] Token NT219-CITIZEN tồn tại
-[ ] Client Agent ready
-[ ] TSP ready
-[ ] Archive ready
-[ ] Portal mở tại localhost:3000
-[ ] Citizen đăng nhập được
-[ ] Officer đăng nhập được
-[ ] Admin đăng nhập được
-[ ] Citizen ký PKCS#11 được
-[ ] Remote OTP hoạt động
-[ ] PAdES-LT verify PASS
-[ ] Attack demo đã chọn chạy PASS
-```
-
-## 13. Diễn giải một số kết quả
+## 12. Diễn giải một số kết quả
 
 - HTTP 409 khi replay: request/nonce đã dùng bị từ chối.
 - `CERTIFICATE_OWNER_MISMATCH`: không thể dùng chứng thư sai chủ sở hữu.
@@ -183,6 +160,6 @@ Reason code thành công: `VALID_PADES_LT`.
 - `PADES_DSS_MISSING`: verifier phát hiện DSS bị xóa.
 - `CERTIFICATE_REVOKED`: chứng thư revoked không thể ký mới.
 
-## 14. Giới hạn đánh giá
+## 13. Giới hạn đánh giá
 
 Kết quả chỉ phản ánh PoC: SoftHSM không tương đương HSM certified; chưa đánh giá side-channel vật lý, tải production, pháp lý chính thức, user study lớn, PAdES-LTA hoặc CA thương mại/quốc gia.
