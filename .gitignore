@@ -161,8 +161,3 @@ pki/root-ca/*
 !pki/root-ca/ca-database/
 pki/root-ca/ca-database/*
 !pki/root-ca/ca-database/.gitkeep
-
-# Python generated cache
-__pycache__/
-*.py[cod]
-
