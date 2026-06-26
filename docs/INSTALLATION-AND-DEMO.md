@@ -178,26 +178,7 @@ npm.cmd run reset:demo
 
 Không tự xóa token database hoặc PKI nếu vẫn muốn giữ bộ khóa demo hiện tại.
 
-## 8. Đưa lên GitHub
-
-Repository không chứa `.env`, private key, token database hoặc runtime data. Sau khi clone, người dùng phải chạy `npm.cmd run setup`.
-
-```powershell
-git init
-git add .
-git status
-```
-
-Kiểm tra ignore:
-
-```powershell
-git check-ignore -v ".\backend\.env"
-git check-ignore -v ".\infrastructure\softhsm\tokens\*"
-```
-
-Không dùng `git add -f` cho file bí mật.
-
-## 9. Lỗi thường gặp
+## 8. Lỗi thường gặp
 
 ### Missing script
 
