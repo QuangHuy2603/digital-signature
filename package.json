@@ -1,0 +1,32 @@
+{
+  "name": "digital-signature-capstone",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PAdES-LT digital signature platform for a citizen services portal using JSON file storage, PKCS#11, SoftHSM, OTP, CRL, OCSP and RFC 3161 timestamps.",
+  "type": "module",
+  "scripts": {
+    "setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-demo.ps1",
+    "prepare:paths": "node scripts/prepare-local-paths.js",
+    "check:environment": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-environment.ps1",
+    "start": "npm run prepare:paths && npm --prefix backend run start:all",
+    "test": "npm --prefix backend run test:run",
+    "test:security": "npm --prefix backend run test:security",
+    "test:attacks": "npm --prefix backend run attack:all",
+    "test:e2e": "npm --prefix backend run e2e:all",
+    "test:e2e:local": "npm --prefix backend run e2e:local",
+    "test:e2e:hardware": "npm --prefix backend run e2e:hardware",
+    "benchmark": "npm --prefix backend run benchmark --",
+    "verify:system": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-system.ps1",
+    "reset:demo": "npm --prefix backend run demo:reset",
+    "account:create-admin": "npm --prefix backend run account:create-admin --",
+    "account:create-officer": "npm --prefix backend run account:create-officer --",
+    "account:list": "npm --prefix backend run account:list --",
+    "account:enable": "npm --prefix backend run account:status -- --action enable",
+    "account:disable": "npm --prefix backend run account:status -- --action disable",
+    "quality:static": "npm --prefix backend run quality:static"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

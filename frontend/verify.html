@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Xác minh tính toàn vẹn và chữ ký số của tài liệu trên Cổng Dịch vụ Hành chính Công."
+    >
+
+    <title>
+        Xác minh tài liệu - Cổng Dịch vụ Hành chính Công
+    </title>
+
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body class="verify-page">
+
+    <!-- HEADER -->
+    <header class="verify-header">
+        <div class="verify-header-inner">
+
+            <!-- Góc trái giống index.html -->
+            <a
+                href="./index.html"
+                class="verify-brand"
+                aria-label="Về trang chủ"
+            >
+                <img
+                    src="./assets/images/portal-logo.png"
+                    alt="Biểu trưng Cổng Dịch vụ Hành chính Công"
+                >
+
+                <span class="verify-brand-text">
+                    <strong>
+                        Cổng Dịch vụ Hành chính Công
+                    </strong>
+
+                    <small>
+                        Trực tuyến An toàn
+                    </small>
+                </span>
+            </a>
+
+            <!-- Góc phải chỉ có 3 nút -->
+            <nav
+                class="verify-account-actions"
+                aria-label="Điều hướng tài khoản"
+            >
+                <a
+                    href="./verify.html"
+                    class="verify-top-button verify-top-button-confirm"
+                    aria-current="page"
+                >
+                    Xác minh
+                </a>
+
+                <a
+                    href="./register.html"
+                    class="verify-top-button verify-top-button-register"
+                >
+                    Đăng ký
+                </a>
+
+                <a
+                    href="./login.html"
+                    class="verify-top-button verify-top-button-login"
+                >
+                    Đăng nhập
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="verify-main">
+
+        <section class="verify-content">
+            <div class="verify-content-inner">
+
+                <!-- FORM XÁC MINH -->
+                <div class="verify-form-card">
+
+                    <div class="verify-card-heading">
+                        <div
+                            class="verify-card-icon"
+                            aria-hidden="true"
+                        >
+                            ✓
+                        </div>
+
+                        <div>
+                            <h2>
+                                Xác minh tài liệu
+                            </h2>
+
+                            <p>
+                                Vui lòng nhập chính xác thông tin được cung cấp
+                                trên tài liệu đã ký.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        id="verifyError"
+                        class="verify-alert verify-alert-error"
+                        role="alert"
+                        style="display: none;"
+                    ></div>
+
+                    <form id="verifyForm">
+
+                        <div class="verify-form-group">
+                            <label for="documentId">
+                                Mã hồ sơ
+                            </label>
+
+                            <input
+                                id="documentId"
+                                type="text"
+                                name="documentId"
+                                required
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="Ví dụ: HS-2026-XXXXXXXX"
+                            >
+
+                            <small>
+                                Mã hồ sơ được in trên tài liệu hoặc hiển thị
+                                trong QR Code.
+                            </small>
+                        </div>
+
+                        <div class="verify-form-group">
+                            <label for="token">
+                                Token xác minh
+                            </label>
+
+                            <input
+                                id="token"
+                                type="text"
+                                name="token"
+                                required
+                                autocomplete="off"
+                                spellcheck="false"
+                                placeholder="Nhập token xác minh"
+                            >
+
+                            <small>
+                                Token được tạo riêng cho từng hồ sơ đã ký.
+                            </small>
+                        </div>
+
+                        <button
+                            id="verifySubmitButton"
+                            type="submit"
+                            class="verify-submit-button"
+                        >
+                            Xác minh tài liệu
+                        </button>
+
+                    </form>
+
+                    <div class="verify-security-note">
+                        <strong>Bảo vệ tính toàn vẹn:</strong>
+
+                        <span>
+                            Hệ thống kiểm tra PAdES-LT, ECDSA P-256, chứng thư X.509,
+                            OCSP/CRL và timestamp RFC 3161 được nhúng trong PDF.
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- KẾT QUẢ XÁC MINH -->
+                <div
+                    id="verifyResult"
+                    class="verify-result-card"
+                    style="display: none;"
+                >
+
+                    <div class="verify-result-header">
+                        <div>
+                            <span class="verify-result-label">
+                                Kết quả kiểm tra
+                            </span>
+
+                            <h2>
+                                Thông tin xác minh
+                            </h2>
+                        </div>
+
+                        <span
+                            id="resultBadge"
+                            class="verify-result-badge"
+                        ></span>
+                    </div>
+
+                    <div class="verify-detail-grid">
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">
+                                Mã hồ sơ
+                            </span>
+
+                            <strong
+                                id="rDocumentId"
+                                class="verify-detail-value"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">
+                                Trạng thái
+                            </span>
+
+                            <strong
+                                id="rStatus"
+                                class="verify-detail-value"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">
+                                Hash khớp
+                            </span>
+
+                            <strong
+                                id="rHashMatch"
+                                class="verify-detail-value"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">
+                                Chữ ký PDF PAdES
+                            </span>
+
+                            <strong
+                                id="rSigValid"
+                                class="verify-detail-value"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Mức PAdES</span>
+                            <strong id="rPadesLevel" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">PDF ByteRange</span>
+                            <strong id="rByteRange" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">CAdES SigningCertificateV2</span>
+                            <strong id="rCadesAttr" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">DSS nhúng trong PDF</span>
+                            <strong id="rDss" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">VRI liên kết chữ ký</span>
+                            <strong id="rVri" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Bằng chứng OCSP/CRL nhúng</span>
+                            <strong id="rEmbeddedEvidence" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Xác minh dài hạn</span>
+                            <strong id="rOfflineReady" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">
+                                Thuật toán
+                            </span>
+
+                            <strong
+                                id="rAlgorithm"
+                                class="verify-detail-value"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">
+                                Thời điểm ký
+                            </span>
+
+                            <strong
+                                id="rSignedAt"
+                                class="verify-detail-value"
+                            >
+                                -
+                            </strong>
+                        </div>
+
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Người ký</span>
+                            <strong id="rSignerName" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Mã cán bộ</span>
+                            <strong id="rOfficerId" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Email cán bộ</span>
+                            <strong id="rOfficerEmail" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Mã chứng thư</span>
+                            <strong id="rCertificateId" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Chứng thư cán bộ</span>
+                            <strong id="rCertValid" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">CMS/CAdES ECDSA</span>
+                            <strong id="rCertSigValid" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Chủ thể chứng thư</span>
+                            <strong id="rCertSubject" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Cơ quan cấp</span>
+                            <strong id="rCertIssuer" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Hiệu lực chứng thư</span>
+                            <strong id="rCertValidity" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item verify-detail-wide">
+                            <span class="verify-detail-label">Fingerprint SHA-256</span>
+                            <strong id="rCertFingerprint" class="verify-detail-value verify-break-all">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Trạng thái thu hồi</span>
+                            <strong id="rRevocationStatus" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Xác minh CRL</span>
+                            <strong id="rCrlStatus" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Nguồn kiểm tra thu hồi</span>
+                            <strong id="rRevocationSource" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">OCSP hiện tại</span>
+                            <strong id="rOcspStatus" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">OCSP tại thời điểm ký</span>
+                            <strong id="rOcspAtSigning" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Chữ ký phản hồi OCSP</span>
+                            <strong id="rOcspSignature" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Timestamp RFC 3161</span>
+                            <strong id="rTimestampValid" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Thời gian tin cậy</span>
+                            <strong id="rTrustedSigningTime" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item verify-detail-wide">
+                            <span class="verify-detail-label">Chính sách TSA</span>
+                            <strong id="rTimestampPolicy" class="verify-detail-value verify-break-all">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Lý do thu hồi</span>
+                            <strong id="rRevocationReason" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Thời điểm thu hồi</span>
+                            <strong id="rRevokedAt" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Phương thức ký</span>
+                            <strong id="rSigningMethod" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Phiên bản Client Agent</span>
+                            <strong id="rClientAgentVersion" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Chế độ TSP</span>
+                            <strong id="rTspMode" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Nhà cung cấp khóa</span>
+                            <strong id="rKeyProvider" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item verify-detail-wide">
+                            <span class="verify-detail-label">Mã kho bằng chứng LTV</span>
+                            <strong id="rArchiveId" class="verify-detail-value verify-break-all">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Kho bằng chứng LTV</span>
+                            <strong id="rArchiveValid" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item">
+                            <span class="verify-detail-label">Chữ ký manifest kho</span>
+                            <strong id="rArchiveSignature" class="verify-detail-value">-</strong>
+                        </div>
+
+                        <div class="verify-detail-item verify-detail-wide">
+                            <span class="verify-detail-label">Đánh giá thời điểm ký</span>
+                            <strong id="rTimestampWarning" class="verify-detail-value">-</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER GIỐNG INDEX.HTML -->
+    <footer class="verify-footer">
+        <div class="verify-footer-inner">
+
+            <span>
+                Cơ quan chủ quản: Văn phòng Chính phủ
+            </span>
+
+            <span>
+                www.dichvucong.gov.vn
+            </span>
+
+            <span>
+                Tổng đài hỗ trợ: 18001096
+            </span>
+
+            <span>
+                Email: dichvucong@chinhphu.vn
+            </span>
+
+        </div>
+    </footer>
+
+    <!-- API -->
+    <script src="./js/api.js"></script>
+
+    <!-- XỬ LÝ XÁC MINH -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+
+            const documentIdInput =
+                document.querySelector("[name='documentId']");
+
+            const tokenInput =
+                document.querySelector("[name='token']");
+
+            const documentIdFromUrl = params.get("id");
+            const tokenFromUrl = params.get("token");
+
+            if (documentIdFromUrl) {
+                documentIdInput.value = documentIdFromUrl;
+            }
+
+            if (tokenFromUrl) {
+                tokenInput.value = tokenFromUrl;
+            }
+
+            const verifyForm =
+                document.getElementById("verifyForm");
+
+            verifyForm.addEventListener(
+                "submit",
+                handleVerifySubmit
+            );
+        });
+
+        async function handleVerifySubmit(event) {
+            event.preventDefault();
+
+            const errorElement =
+                document.getElementById("verifyError");
+
+            const resultElement =
+                document.getElementById("verifyResult");
+
+            const submitButton =
+                document.getElementById("verifySubmitButton");
+
+            errorElement.textContent = "";
+            errorElement.style.display = "none";
+            resultElement.style.display = "none";
+
+            const documentId =
+                document
+                    .querySelector("[name='documentId']")
+                    .value
+                    .trim();
+
+            const token =
+                document
+                    .querySelector("[name='token']")
+                    .value
+                    .trim();
+
+            if (!documentId || !token) {
+                errorElement.textContent =
+                    "Vui lòng nhập đầy đủ mã hồ sơ và token xác minh.";
+
+                errorElement.style.display = "block";
+                return;
+            }
+
+            const originalButtonText = submitButton.textContent;
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Đang xác minh...";
+
+            try {
+                const requestUrl =
+                    `${API_BASE}/public/documents/verify/` +
+                    `${encodeURIComponent(documentId)}` +
+                    `?token=${encodeURIComponent(token)}`;
+
+                const response = await fetch(requestUrl, {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok && !data.reason) {
+                    throw new Error(
+                        data.message ||
+                        "Không thể xác minh tài liệu."
+                    );
+                }
+
+                if (!data.valid) {
+                    showVerificationError(data);
+                }
+
+                if (data.document_id) {
+                    showVerificationResult(data);
+                }
+            } catch (error) {
+                errorElement.textContent =
+                    error.message ||
+                    "Đã xảy ra lỗi trong quá trình xác minh.";
+
+                errorElement.style.display = "block";
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        }
+
+        function showVerificationError(data) {
+            const errorElement =
+                document.getElementById("verifyError");
+
+            let message;
+
+            if (data.hash_matched === false) {
+                message =
+                    "Cảnh báo: Tài liệu đã bị thay đổi sau khi ký số.";
+            } else if (data.reason === "INVALID_TOKEN") {
+                message =
+                    "Token xác minh không hợp lệ hoặc đã hết hạn.";
+            } else if (data.reason === "DOCUMENT_NOT_FOUND") {
+                message =
+                    "Không tìm thấy hồ sơ tương ứng.";
+            } else if (data.reason === "DOCUMENT_NOT_ACTIVE") {
+                message =
+                    "Hồ sơ chưa được ký số hoặc chưa ở trạng thái hoạt động.";
+            } else if (data.reason === "OFFICER_CERTIFICATE_REVOKED") {
+                message =
+                    "Chứng thư của cán bộ hiện đã bị thu hồi. Chữ ký có thể vẫn đúng về mặt mật mã nhưng hệ thống không thể khẳng định thời điểm ký trước hay sau khi thu hồi vì chưa có timestamp RFC 3161.";
+            } else if (data.reason === "CRL_SIGNATURE_INVALID" || data.reason === "CRL_OUT_OF_SYNC") {
+                message =
+                    "Không thể tin cậy trạng thái chứng thư vì CRL không hợp lệ hoặc không đồng bộ.";
+            } else if (data.reason === "TIMESTAMP_INVALID" || data.reason === "TIMESTAMP_EVIDENCE_NOT_AVAILABLE") {
+                message =
+                    "Timestamp RFC 3161 không hợp lệ hoặc không có bằng chứng timestamp.";
+            } else if (String(data.reason || "").startsWith("ARCHIVE_") || String(data.reason || "").startsWith("LTV_")) {
+                message =
+                    "Kho bằng chứng LTV không hợp lệ: " + data.reason;
+            } else if (String(data.reason || "").startsWith("OCSP_")) {
+                message =
+                    "Xác minh OCSP thất bại: " + data.reason;
+            } else {
+                message =
+                    "Xác minh thất bại: " +
+                    (data.reason || "Không xác định được nguyên nhân.");
+            }
+
+            errorElement.textContent = message;
+            errorElement.style.display = "block";
+        }
+
+        function showVerificationResult(data) {
+            const resultElement =
+                document.getElementById("verifyResult");
+
+            const badge =
+                document.getElementById("resultBadge");
+
+            resultElement.style.display = "block";
+
+            badge.className =
+                data.valid
+                    ? "verify-result-badge verify-result-valid"
+                    : "verify-result-badge verify-result-invalid";
+
+            badge.textContent =
+                data.valid
+                    ? "✓ HỢP LỆ"
+                    : "✕ KHÔNG HỢP LỆ";
+
+            document.getElementById("rDocumentId").textContent =
+                data.document_id || "-";
+
+            document.getElementById("rStatus").textContent =
+                formatDocumentStatus(data.status);
+
+            document.getElementById("rHashMatch").textContent =
+                data.hash_matched === true
+                    ? "✓ Có"
+                    : data.hash_matched === false
+                        ? "✕ Không"
+                        : "-";
+
+            document.getElementById("rSigValid").textContent =
+                data.signature_valid === true
+                    ? "✓ Có"
+                    : data.signature_valid === false
+                        ? "✕ Không"
+                        : "-";
+
+            document.getElementById("rPadesLevel").textContent =
+                data.pades_level || "-";
+            document.getElementById("rByteRange").textContent =
+                data.pades_byte_range_valid === true ? "✓ Hợp lệ" : "✕ Không hợp lệ";
+            document.getElementById("rCadesAttr").textContent =
+                data.pades_signing_certificate_attribute === true ? "✓ Có" : "✕ Không có";
+            document.getElementById("rDss").textContent =
+                data.pades_dss_present === true ? "✓ Có" : "✕ Không có";
+            document.getElementById("rVri").textContent =
+                data.pades_vri_present === true && data.pades_vri_binding_valid === true
+                    ? "✓ Hợp lệ" : "✕ Không hợp lệ/không có";
+            document.getElementById("rEmbeddedEvidence").textContent =
+                `${data.pades_embedded_certificate_count || 0} cert · ${data.pades_embedded_ocsp_count || 0} OCSP · ${data.pades_embedded_crl_count || 0} CRL`;
+            document.getElementById("rOfflineReady").textContent =
+                data.pades_offline_verification_ready === true ? "✓ Sẵn sàng" : "✕ Chưa sẵn sàng";
+
+            document.getElementById("rAlgorithm").textContent =
+                data.algorithm || "-";
+
+            document.getElementById("rSignedAt").textContent =
+                data.signed_at
+                    ? new Date(data.signed_at)
+                        .toLocaleString("vi-VN")
+                    : "-";
+
+            const cert = data.officer_certificate || {};
+            const signer = data.signed_by || {};
+            document.getElementById("rSignerName").textContent = signer.full_name || "-";
+            document.getElementById("rOfficerId").textContent = signer.officer_id || cert.officer_id || "-";
+            document.getElementById("rOfficerEmail").textContent = signer.email || cert.email || "-";
+            document.getElementById("rCertificateId").textContent = data.certificate_id || cert.certificate_id || "-";
+            document.getElementById("rCertValid").textContent =
+                data.certificate_chain_valid === true ? "✓ Hợp lệ" :
+                data.certificate_available === false ? "Chưa có (hồ sơ cũ)" : "✕ Không hợp lệ";
+            document.getElementById("rCertSigValid").textContent =
+                data.certificate_signature_valid === true ? "✓ Hợp lệ" :
+                data.certificate_available === false ? "Chưa có" : "✕ Không hợp lệ";
+            document.getElementById("rCertSubject").textContent = cert.subject || "-";
+            document.getElementById("rCertIssuer").textContent = cert.issuer || "-";
+            document.getElementById("rCertValidity").textContent =
+                cert.valid_from && cert.valid_to
+                    ? `${new Date(cert.valid_from).toLocaleDateString("vi-VN")} - ${new Date(cert.valid_to).toLocaleDateString("vi-VN")}`
+                    : "-";
+            document.getElementById("rCertFingerprint").textContent = cert.fingerprint_sha256 || "-";
+            document.getElementById("rRevocationStatus").textContent =
+                data.certificate_revoked === true
+                    ? "✕ Đã bị thu hồi"
+                    : data.revocation_checked === true
+                        ? "✓ Chưa bị thu hồi"
+                        : "Chưa kiểm tra";
+            document.getElementById("rCrlStatus").textContent =
+                data.crl_signature_valid === true
+                    ? `✓ Hợp lệ${data.crl_number !== null && data.crl_number !== undefined ? ` (số ${data.crl_number})` : ""}`
+                    : data.crl_available === false
+                        ? "✕ Không tìm thấy CRL"
+                        : "✕ CRL không hợp lệ";
+            document.getElementById("rRevocationSource").textContent =
+                data.revocation_source || "-";
+            document.getElementById("rOcspStatus").textContent =
+                data.ocsp_status
+                    ? `${String(data.ocsp_status).toUpperCase()}${data.ocsp_response_signature_valid ? " (đã xác minh chữ ký)" : ""}`
+                    : "-";
+            document.getElementById("rOcspAtSigning").textContent =
+                data.ocsp_status_at_signing
+                    ? `${String(data.ocsp_status_at_signing).toUpperCase()}${data.ocsp_evidence_at_signing_valid ? " ✓" : " ✕"}`
+                    : "-";
+            document.getElementById("rOcspSignature").textContent =
+                data.ocsp_response_signature_valid === true ? "✓ Hợp lệ" : "✕ Không hợp lệ/không có";
+            document.getElementById("rTimestampValid").textContent =
+                data.timestamp_valid === true ? "✓ Hợp lệ" : "✕ Không hợp lệ/không có";
+            document.getElementById("rTrustedSigningTime").textContent =
+                data.trusted_signing_time
+                    ? new Date(data.trusted_signing_time).toLocaleString("vi-VN")
+                    : "-";
+            document.getElementById("rTimestampPolicy").textContent =
+                data.timestamp_policy_oid || "-";
+            document.getElementById("rRevocationReason").textContent =
+                data.revocation_reason || "-";
+            document.getElementById("rRevokedAt").textContent =
+                data.revoked_at
+                    ? new Date(data.revoked_at).toLocaleString("vi-VN")
+                    : "-";
+            document.getElementById("rSigningMethod").textContent =
+                data.signing_method === "local" ? "Ký cục bộ qua Client Agent" : "Ký từ xa qua TSP";
+            document.getElementById("rClientAgentVersion").textContent =
+                data.client_agent_version || "-";
+            document.getElementById("rTspMode").textContent =
+                data.tsp_mode ? String(data.tsp_mode).toUpperCase() : "-";
+            document.getElementById("rKeyProvider").textContent =
+                data.key_provider ? String(data.key_provider).toUpperCase() : "-";
+            document.getElementById("rArchiveId").textContent =
+                data.archive_id || "-";
+            document.getElementById("rArchiveValid").textContent =
+                data.archive_valid === true ? "✓ Hợp lệ" : "✕ Không hợp lệ/không có";
+            document.getElementById("rArchiveSignature").textContent =
+                data.archive_manifest_signature_valid === true ? "✓ Hợp lệ" : "✕ Không hợp lệ/không có";
+            document.getElementById("rTimestampWarning").textContent =
+                data.revocation_time_assessment === "SIGNED_BEFORE_REVOCATION_CONFIRMED_BY_RFC3161"
+                    ? "Timestamp RFC 3161 xác nhận chữ ký đã tồn tại trước thời điểm chứng thư bị thu hồi."
+                    : data.certificate_revoked === true
+                        ? "Chứng thư đã bị thu hồi và timestamp không chứng minh được chữ ký có trước thời điểm thu hồi."
+                        : data.timestamp_valid === true
+                            ? "Timestamp RFC 3161 hợp lệ; thời điểm ký được TSA thử nghiệm xác nhận."
+                            : "Không có timestamp RFC 3161 hợp lệ.";
+
+            resultElement.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+
+        function formatDocumentStatus(status) {
+            const statusMap = {
+                submitted: "Chờ duyệt",
+                issued: "Đã ký",
+                rejected: "Đã từ chối",
+                revoked: "Đã thu hồi"
+            };
+
+            return statusMap[status] || status || "-";
+        }
+    </script>
+
+</body>
+</html>

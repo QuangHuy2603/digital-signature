@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công dân - Cổng Dịch vụ công</title>
+    <link rel="stylesheet" href="/css/style.css?v=20260624-dashboard-fix">
+</head>
+<body class="dashboard-page citizen-dashboard">
+    <header class="dashboard-header">
+        <div class="dashboard-header-inner">
+            <a href="/" class="dashboard-brand" aria-label="Về trang chủ">
+                <img src="/assets/images/portal-logo.png" alt="Biểu trưng Cổng Dịch vụ Hành chính Công">
+                <span class="dashboard-brand-text">
+                    <strong>Cổng Dịch vụ Hành chính Công</strong>
+                    <small>Trực tuyến An toàn</small>
+                </span>
+            </a>
+
+            <nav class="dashboard-nav" aria-label="Điều hướng chính">
+                <a
+                    id="navThutuc"
+                    href="/citizen/dashboard.html"
+                    class="active"
+                >
+                    Thủ tục hành chính
+                </a>
+
+                <a href="/certificates.html">
+                    Quản lý chứng thư
+                </a>
+
+                <a href="/verify.html">
+                    Xác minh
+                </a>
+
+                <div id="navAuth"></div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Hồ sơ của tôi</h1>
+        <p class="page-subtitle">Nộp hồ sơ đăng ký tạm trú, xem trước biểu mẫu và theo dõi kết quả xử lý.</p>
+
+        <div id="alertBox" class="alert" style="display:none"></div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="new">Nộp hồ sơ mới</div>
+            <div class="tab" data-tab="list">Hồ sơ đã nộp</div>
+        </div>
+
+        <div id="tab-new" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Đơn đăng ký tạm trú (CT01)</h2>
+                </div>
+                <form id="submitForm">
+                    <div class="form-group">
+                        <label>Kính gửi</label>
+                        <input type="text" name="office_name" value="Công an phường Linh Trung">
+                    </div>
+
+                    <h3 class="form-section-title">Thông tin cá nhân</h3>
+                    <div class="form-group">
+                        <label>Họ, chữ đệm và tên *</label>
+                        <input type="text" name="full_name" required>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Ngày sinh</label>
+                            <input type="text" name="birth_day" placeholder="01">
+                        </div>
+                        <div class="form-group">
+                            <label>Tháng sinh</label>
+                            <input type="text" name="birth_month" placeholder="01">
+                        </div>
+                        <div class="form-group">
+                            <label>Năm sinh</label>
+                            <input type="text" name="birth_year" placeholder="2000">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Giới tính</label>
+                            <select name="gender">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Số CCCD *</label>
+                            <input type="text" name="citizen_id" required pattern="\d{12}" placeholder="12 chữ số">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Số điện thoại *</label>
+                            <input type="text" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email">
+                        </div>
+                    </div>
+
+                    <h3 class="form-section-title">Thông tin chủ hộ</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Họ tên chủ hộ</label>
+                            <input type="text" name="householder_name">
+                        </div>
+                        <div class="form-group">
+                            <label>Mối quan hệ</label>
+                            <input type="text" name="relationship" placeholder="người thuê">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CCCD chủ hộ</label>
+                        <input type="text" name="householder_id" pattern="\d{12}" placeholder="12 chữ số">
+                    </div>
+
+                    <h3 class="form-section-title">Nội dung đề nghị</h3>
+                    <div class="form-group">
+                        <label>Nội dung *</label>
+                        <textarea name="request_content" required rows="3" placeholder="Đăng ký tạm trú phục vụ..."></textarea>
+                    </div>
+
+                    <h3 class="form-section-title">Thành viên trong hộ gia đình cùng thay đổi</h3>
+                    <div class="table-wrap" style="margin-bottom:8px">
+                        <table id="membersTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:36px">TT</th>
+                                    <th>Họ, chữ đệm và tên</th>
+                                    <th style="width:130px">Ngày, tháng, năm sinh</th>
+                                    <th style="width:80px">Giới tính</th>
+                                    <th style="width:130px">Số định danh cá nhân</th>
+                                    <th>Mối quan hệ với chủ hộ</th>
+                                    <th style="width:40px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersBody">
+                                <tr id="membersEmpty"><td colspan="7" style="text-align:center;color:var(--gray-400);font-size:13px;padding:10px">Chưa có thành viên. Nhấn "Thêm" để bổ sung.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="member-action-row">
+                        <button type="button" onclick="addMemberRow()" class="btn btn-outline btn-sm">+ Thêm thành viên</button>
+                    </div>
+
+                    <div style="display:flex;gap:12px;flex-wrap:wrap">
+                        <button type="button" id="btnPreview" class="btn btn-outline btn-lg">Xem trước</button>
+                        <button type="submit" class="btn btn-primary btn-lg">Nộp hồ sơ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="tab-list" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Danh sách hồ sơ</h2>
+                    <button onclick="loadMyDocs()" class="btn btn-sm btn-outline">Tải lại</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã hồ sơ</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="docTableBody">
+                            <tr><td colspan="4" class="empty-state"><p>Đang tải...</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="previewModal" class="modal-overlay" style="display:none">
+        <div class="card">
+            <div class="card-header">
+                <h2>Xem trước hồ sơ</h2>
+                <button onclick="closePreview()" class="btn btn-sm btn-outline">Đóng</button>
+            </div>
+            <iframe id="previewFrame" style="width:100%;height:500px;border:1px solid var(--gray-200);border-radius:6px"></iframe>
+        </div>
+    </div>
+
+    <div id="citizenSignModal" class="modal-overlay" style="display:none">
+        <div class="card" style="width:min(680px,94vw)">
+            <div class="card-header">
+                <h2>Ký hồ sơ bằng Client Agent</h2>
+                <button type="button" onclick="closeCitizenSignModal()" class="btn btn-sm btn-outline">Đóng</button>
+            </div>
+            <div style="padding:18px">
+                <p style="margin-top:0">Chọn chứng thư công dân. Provider <strong>PKCS#11</strong> giữ khóa riêng trong SoftHSM/USB token mô phỏng.</p>
+                <div id="citizenAgentStatus" class="alert" style="display:block;margin-bottom:14px">Đang kiểm tra Client Agent...</div>
+                <div class="form-group">
+                    <label>Chứng thư ký</label>
+                    <select id="citizenCertificateSelect"></select>
+                </div>
+                <div id="citizenSignDigest" style="font-size:12px;word-break:break-all;color:#475569;margin-bottom:14px"></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                    <button type="button" onclick="closeCitizenSignModal()" class="btn btn-outline">Hủy</button>
+                    <button type="button" id="btnCitizenSignNow" onclick="performCitizenSigning()" class="btn btn-primary">Ký và nộp cho cán bộ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="dashboard-footer">
+        <div class="dashboard-footer-inner">
+            <span>Cơ quan chủ quản: Văn phòng Chính phủ</span>
+            <span>www.dichvucong.gov.vn</span>
+            <span>Tổng đài hỗ trợ: 18001096</span>
+            <span>Email: dichvucong@chinhphu.vn</span>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        let currentPreviewId = null;
+        let citizenSigningDocumentId = null;
+        let citizenSigningCertificates = [];
+
+        if (!requireAuth()) { /* redirect */ } else {
+            updateNav();
+
+            document.querySelectorAll(".tab").forEach(tab => {
+                tab.addEventListener("click", () => {
+                    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+                    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+                    tab.classList.add("active");
+                    document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
+                    if (tab.dataset.tab === "list") loadMyDocs();
+                });
+            });
+
+            document.getElementById("btnPreview").addEventListener("click", async () => {
+                try {
+                    const formData = getFormData();
+                    const res = await apiPost("/app/documents/preview", formData);
+                    currentPreviewId = res.data.preview_id;
+                    document.getElementById("previewFrame").src = await apiBlobUrl(res.data.preview_url);
+                    document.getElementById("previewModal").style.display = "flex";
+                } catch (err) {
+                    showAlert(err.message, "error");
+                }
+            });
+
+            document.getElementById("submitForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                try {
+                    const formData = getFormData();
+                    if (currentPreviewId) {
+                        formData.preview_id = currentPreviewId;
+                    }
+                    const res = await apiPost("/app/documents/submit", formData);
+                    showAlert(`Hồ sơ ${res.data.document_id} đã tạo. Hãy mở tab Hồ sơ đã nộp và ký bằng Client Agent trước khi gửi cán bộ.`, "success");
+                    document.getElementById("submitForm").reset();
+                    currentPreviewId = null;
+                } catch (err) {
+                    showAlert(err.message, "error");
+                }
+            });
+
+            document.getElementById("submitForm").addEventListener("input", () => {
+                currentPreviewId = null;
+            });
+
+            loadMyDocs();
+        }
+
+        let memberCount = 0;
+
+        function addMemberRow() {
+            const tbody = document.getElementById("membersBody");
+            const empty = document.getElementById("membersEmpty");
+            if (empty) empty.remove();
+            memberCount++;
+            const idx = memberCount;
+            const tr = document.createElement("tr");
+            tr.id = `member-row-${idx}`;
+            tr.innerHTML = `
+                <td style="text-align:center">${idx}</td>
+                <td><input type="text" class="m-full_name" placeholder="Họ và tên"></td>
+                <td><input type="text" class="m-birth_date" placeholder="dd/mm/yyyy"></td>
+                <td>
+                    <select class="m-gender">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </td>
+                <td><input type="text" class="m-personal_id" placeholder="12 chữ số"></td>
+                <td><input type="text" class="m-relationship" placeholder="VD: Vợ, Con..."></td>
+                <td><button type="button" onclick="removeMemberRow('member-row-${idx}')" class="member-remove-btn" title="Xóa thành viên">×</button></td>
+            `;
+            tbody.appendChild(tr);
+            currentPreviewId = null;
+        }
+
+        function removeMemberRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) row.remove();
+            if (document.getElementById("membersBody").children.length === 0) {
+                document.getElementById("membersBody").innerHTML =
+                    '<tr id="membersEmpty"><td colspan="7" style="text-align:center;color:var(--gray-400);font-size:13px;padding:10px">Chưa có thành viên. Nhấn "Thêm" để bổ sung.</td></tr>';
+            }
+            currentPreviewId = null;
+        }
+
+        function getMembers() {
+            const rows = Array.from(document.querySelectorAll("#membersBody tr[id^='member-row-']"));
+            const errors = [];
+            const members = rows.map((tr, idx) => {
+                const num = idx + 1;
+                const fullName = tr.querySelector(".m-full_name").value.trim();
+                if (!fullName) return null; // bỏ qua hàng trống
+
+                const raw = tr.querySelector(".m-birth_date").value.trim();
+                const personalId = tr.querySelector(".m-personal_id").value.trim();
+                let birth_date = "";
+
+                if (!raw) {
+                    errors.push(`Thành viên ${num}: Thiếu ngày sinh`);
+                } else {
+                    const parts = raw.split("/");
+                    if (parts.length === 3) {
+                        const d = parseInt(parts[0], 10);
+                        const mo = parseInt(parts[1], 10);
+                        const y = parseInt(parts[2], 10);
+                        const dateObj = new Date(y, mo - 1, d);
+                        if (!parts[2] || isNaN(dateObj.getTime()) ||
+                            dateObj.getFullYear() !== y || dateObj.getMonth() !== mo - 1 || dateObj.getDate() !== d) {
+                            errors.push(`Thành viên ${num}: Ngày sinh không hợp lệ (${raw})`);
+                        } else {
+                            // Chuẩn hóa sang yyyy-mm-dd có zero-padding
+                            birth_date = `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                        }
+                    } else {
+                        errors.push(`Thành viên ${num}: Ngày sinh sai định dạng – phải là dd/mm/yyyy`);
+                    }
+                }
+
+                if (personalId && !/^\d{12}$/.test(personalId)) {
+                    errors.push(`Thành viên ${num}: Số định danh phải có đúng 12 chữ số`);
+                }
+
+                return {
+                    full_name: fullName,
+                    birth_date,
+                    gender: tr.querySelector(".m-gender").value,
+                    personal_id: personalId,
+                    relationship_to_head: tr.querySelector(".m-relationship").value.trim()
+                };
+            }).filter(m => m !== null);
+
+            if (errors.length > 0) throw new Error(errors.join("\n"));
+            return members;
+        }
+
+        function getFormData() {
+            const f = document.getElementById("submitForm");
+            return {
+                full_name: f.full_name.value.trim(),
+                citizen_id: f.citizen_id.value.trim(),
+                phone: f.phone.value.trim(),
+                request_content: f.request_content.value.trim(),
+                office_name: f.office_name.value.trim(),
+                birth_day: f.birth_day.value.trim(),
+                birth_month: f.birth_month.value.trim(),
+                birth_year: f.birth_year.value.trim(),
+                gender: f.gender.value,
+                email: f.email.value.trim(),
+                householder_name: f.householder_name.value.trim(),
+                householder_id: f.householder_id.value.trim(),
+                relationship: f.relationship.value.trim(),
+                members: getMembers()
+            };
+        }
+
+        async function loadMyDocs() {
+            try {
+                const res = await apiGet("/app/documents/");
+                const all = Array.isArray(res) ? res : (res.data || []);
+                const tbody = document.getElementById("docTableBody");
+                if (!all || all.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Chưa có hồ sơ nào</p></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = all.map(doc => {
+                    const statusLabel = doc.status === "issued" ? "Đã phát hành"
+                        : doc.status === "submitted" ? "Đã ký công dân · Chờ cán bộ"
+                        : doc.status === "awaiting_citizen_signature" ? "Chờ công dân ký"
+                        : doc.status === "rejected" ? "Từ chối"
+                        : doc.status;
+                    const verifyToken = doc.verify_url ? new URL(doc.verify_url).searchParams.get("token") : null;
+                    const verifyLink = verifyToken ? `../verify.html?id=${doc.document_id}&token=${verifyToken}` : "#";
+                    const rejectionNote = doc.status === "rejected" && doc.rejection_reason
+                        ? `<div style="font-size:12px;color:#b91c1c;margin-top:4px">Lý do: ${doc.rejection_reason}</div>`
+                        : "";
+                    return `
+                    <tr>
+                        <td><strong>${doc.document_id}</strong></td>
+                        <td><span class="badge badge-${doc.status}">${statusLabel}</span>${rejectionNote}</td>
+                        <td>${new Date(doc.created_at).toLocaleString("vi-VN")}</td>
+                        <td>
+                            ${doc.status === "awaiting_citizen_signature" ? `<button onclick="openCitizenSigning('${doc.document_id}')" class="btn btn-sm btn-success">Ký hồ sơ</button>` : ""}
+                            ${doc.status === "submitted" && doc.citizen_signature_valid ? `<span class="badge badge-issued">Chữ ký công dân hợp lệ</span>` : ""}
+                            ${doc.status === "issued" ? `<button onclick="downloadDocument('${doc.document_id}')" class="btn btn-sm btn-primary">Tải PDF</button>` : ""}
+                            ${verifyToken ? `<a href="${verifyLink}" class="btn btn-sm btn-outline">Xác minh</a>` : ""}
+                        </td>
+                    </tr>`;
+                }).join("");
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function openCitizenSigning(documentId) {
+            citizenSigningDocumentId = documentId;
+            const modal = document.getElementById("citizenSignModal");
+            const status = document.getElementById("citizenAgentStatus");
+            const select = document.getElementById("citizenCertificateSelect");
+            const digest = document.getElementById("citizenSignDigest");
+            modal.style.display = "flex";
+            status.className = "alert";
+            status.textContent = "Đang kiểm tra Client Agent và chứng thư...";
+            select.innerHTML = "";
+            digest.textContent = "";
+            try {
+                const healthResponse = await fetch("http://127.0.0.1:3500/health");
+                const health = await healthResponse.json();
+                if (!healthResponse.ok || !health.ready) throw new Error("Client Agent chưa sẵn sàng");
+                const result = await apiGet("/app/documents/citizen-signing/certificates");
+                citizenSigningCertificates = (result.certificates || []).filter(item => item.status === "active" && item.provider_ready);
+                if (!citizenSigningCertificates.length) throw new Error("Không có chứng thư công dân sẵn sàng trong Client Agent");
+                select.innerHTML = citizenSigningCertificates.map(item => {
+                    const keyText = item.private_key_exportable ? "khóa file lab" : "khóa không xuất được";
+                    return `<option value="${item.certificate_id}">${item.provider.toUpperCase()} · ${item.certificate_id} · ${keyText}</option>`;
+                }).join("");
+                status.className = "alert alert-success";
+                status.textContent = `Client Agent ${health.version || "1.0.0"} đã kết nối. Provider: ${Object.entries(health.providers || {}).filter(([,v]) => v).map(([k]) => k.toUpperCase()).join(", ") || health.provider}.`;
+            } catch (error) {
+                status.className = "alert alert-error";
+                status.textContent = `${error.message}. Hãy chạy npm.cmd run start:all.`;
+                document.getElementById("btnCitizenSignNow").disabled = true;
+            }
+        }
+
+        function closeCitizenSignModal() {
+            document.getElementById("citizenSignModal").style.display = "none";
+            citizenSigningDocumentId = null;
+            document.getElementById("btnCitizenSignNow").disabled = false;
+        }
+
+        async function performCitizenSigning() {
+            const button = document.getElementById("btnCitizenSignNow");
+            const select = document.getElementById("citizenCertificateSelect");
+            const certificate = citizenSigningCertificates.find(item => item.certificate_id === select.value);
+            if (!citizenSigningDocumentId || !certificate) return;
+            button.disabled = true;
+            button.textContent = "Đang ký...";
+            try {
+                const created = await apiPost(`/app/documents/${citizenSigningDocumentId}/citizen-signing-request`, {
+                    certificate_id: certificate.certificate_id,
+                    provider: certificate.provider
+                });
+                const signingRequest = created.signingRequest;
+                document.getElementById("citizenSignDigest").textContent = `SHA-256: ${signingRequest.document_digest_sha256}`;
+                const signed = await apiPost(`/app/documents/${citizenSigningDocumentId}/citizen-sign`, {
+                    request_id: signingRequest.request_id,
+                    nonce: signingRequest.nonce
+                });
+                showAlert(`Ký công dân thành công bằng ${signed.data.provider.toUpperCase()}. Hồ sơ đã chuyển sang chờ cán bộ.`, "success");
+                closeCitizenSignModal();
+                await loadMyDocs();
+            } catch (error) {
+                showAlert(error.message, "error");
+            } finally {
+                button.disabled = false;
+                button.textContent = "Ký và nộp cho cán bộ";
+            }
+        }
+
+        function closePreview() {
+            document.getElementById("previewModal").style.display = "none";
+        }
+
+        async function downloadDocument(docId) {
+            try {
+                const res = await apiFetch(`/app/documents/${docId}/signed-pdf`);
+                if (!res) return;
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    if (data.tampered) {
+                        showAlert("⚠️ Không thể tải xuống: File PDF đã bị sửa đổi sau khi ký số. Vui lòng liên hệ cơ quan có thẩm quyền.", "error");
+                    } else {
+                        showAlert(data.message || "Tải xuống thất bại", "error");
+                    }
+                    return;
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${docId}-signed.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        function showAlert(msg, type) {
+            const el = document.getElementById("alertBox");
+            el.className = `alert alert-${type}`;
+            el.textContent = msg;
+            el.style.display = "block";
+            setTimeout(() => el.style.display = "none", 5000);
+        }
+    </script>
+</body>
+</html>

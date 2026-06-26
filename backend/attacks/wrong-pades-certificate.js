@@ -1,0 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import { verifyPadesPdf } from "../src/crypto/pades.service.js";
+import { createPadesFixture, printResult } from "./pades-attack-utils.js";
+const fixture = await createPadesFixture();
+const original = verifyPadesPdf({ pdfPath: fixture.signedPdfPath, expectedFingerprint: fixture.certificateRecord.fingerprint_sha256 });
+const roguePem = fs.readFileSync(path.resolve("../pki/test-fixtures/rogue/rogue-officer.crt"), "utf8");
+const rogueFingerprint = new crypto.X509Certificate(roguePem).fingerprint256;
+const attacked = verifyPadesPdf({ pdfPath: fixture.signedPdfPath, expectedFingerprint: rogueFingerprint });
+printResult({ title: "ATTACK 4 - WRONG SIGNER CERTIFICATE EXPECTED", originalValid: original.valid, attackedValid: attacked.valid, reason: attacked.reason, expectedReason: "PADES_SIGNER_CERTIFICATE_MISMATCH" });

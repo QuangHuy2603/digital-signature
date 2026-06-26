@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Đăng ký - Cổng Dịch vụ Hành chính Công
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=20260624-6"
+    >
+</head>
+
+<body class="account-page">
+
+    <!-- HEADER -->
+    <header class="account-header">
+        <div class="account-header-inner">
+
+            <a
+                href="/"
+                class="account-brand"
+                aria-label="Về trang chủ"
+            >
+                <img
+                    src="/assets/images/portal-logo.png"
+                    alt="Biểu trưng Cổng Dịch vụ Hành chính Công"
+                >
+
+                <span class="account-brand-text">
+                    <strong>
+                        Cổng Dịch vụ Hành chính Công
+                    </strong>
+
+                    <small>
+                        Trực tuyến An toàn
+                    </small>
+                </span>
+            </a>
+
+            <nav
+                class="account-header-actions"
+                aria-label="Điều hướng tài khoản"
+            >
+                <a
+                    href="/verify.html"
+                    class="account-top-button account-top-verify"
+                >
+                    Xác minh
+                </a>
+
+                <a
+                    href="/register.html"
+                    class="account-top-button account-top-register"
+                    aria-current="page"
+                >
+                    Đăng ký
+                </a>
+
+                <a
+                    href="/login.html"
+                    class="account-top-button account-top-login"
+                >
+                    Đăng nhập
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- NỘI DUNG -->
+    <main class="account-main">
+        <div class="account-main-inner">
+
+            <section class="account-card account-card-register">
+
+                <div class="account-card-heading">
+                    <div
+                        class="account-card-icon"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </div>
+
+                    <div>
+                        <span class="account-card-label">
+                            Tài khoản công dân
+                        </span>
+
+                        <h1>
+                            Đăng ký tài khoản
+                        </h1>
+
+                        <p>
+                            Tạo tài khoản để nộp hồ sơ và nhận kết quả
+                            dịch vụ công trực tuyến.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    id="authError"
+                    class="account-alert account-alert-error"
+                    style="display: none;"
+                ></div>
+
+                <form id="registerForm">
+
+                    <div class="account-form-group">
+                        <label for="registerFullName">
+                            Họ và tên
+                        </label>
+
+                        <input
+                            id="registerFullName"
+                            type="text"
+                            name="full_name"
+                            required
+                            autocomplete="name"
+                            placeholder="Nguyễn Văn A"
+                        >
+                    </div>
+
+                    <div class="account-form-group">
+                        <label for="registerEmail">
+                            Email
+                        </label>
+
+                        <input
+                            id="registerEmail"
+                            type="email"
+                            name="email"
+                            required
+                            autocomplete="email"
+                            placeholder="you@example.com"
+                        >
+                    </div>
+
+                    <div class="account-form-row">
+
+                        <div class="account-form-group">
+                            <label for="registerPassword">
+                                Mật khẩu
+                            </label>
+
+                            <input
+                                id="registerPassword"
+                                type="password"
+                                name="password"
+                                required
+                                minlength="6"
+                                autocomplete="new-password"
+                                placeholder="Tối thiểu 6 ký tự"
+                            >
+                        </div>
+
+                        <div class="account-form-group">
+                            <label for="registerConfirmPassword">
+                                Xác nhận mật khẩu
+                            </label>
+
+                            <input
+                                id="registerConfirmPassword"
+                                type="password"
+                                name="confirm_password"
+                                required
+                                minlength="6"
+                                autocomplete="new-password"
+                                placeholder="Nhập lại mật khẩu"
+                            >
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="account-submit-button"
+                    >
+                        Đăng ký
+                    </button>
+
+                </form>
+
+                <p class="account-switch-text">
+                    Đã có tài khoản?
+
+                    <a href="/login.html">
+                        Đăng nhập
+                    </a>
+                </p>
+
+                <div class="account-security-note">
+                    <strong>Lưu ý:</strong>
+
+                    <span>
+                        Sử dụng email hợp lệ và mật khẩu có ít nhất
+                        6 ký tự để tạo tài khoản.
+                    </span>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="account-footer">
+        <div class="account-footer-inner">
+
+            <span>
+                Cơ quan chủ quản: Văn phòng Chính phủ
+            </span>
+
+            <span>
+                www.dichvucong.gov.vn
+            </span>
+
+            <span>
+                Tổng đài hỗ trợ: 18001096
+            </span>
+
+            <span>
+                Email: dichvucong@chinhphu.vn
+            </span>
+
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+
+</body>
+</html>

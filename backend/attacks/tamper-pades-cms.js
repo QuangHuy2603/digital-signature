@@ -1,0 +1,14 @@
+import { extractPadesContainer, verifyPadesPdf } from "../src/crypto/pades.service.js";
+import { createPadesFixture, printResult } from "./pades-attack-utils.js";
+const fixture = await createPadesFixture();
+const original = verifyPadesPdf({ pdfPath: fixture.signedPdfPath, expectedFingerprint: fixture.certificateRecord.fingerprint_sha256 });
+const extracted = extractPadesContainer(fixture.signedPdfBytes);
+const signatureHex = extracted.cmsDer.toString("hex").toUpperCase();
+const pdfAscii = fixture.signedPdfBytes.toString("ascii");
+const start = pdfAscii.indexOf(signatureHex);
+if (start < 0) throw new Error("CMS bytes were not found in PDF Contents");
+const tampered = Buffer.from(fixture.signedPdfBytes);
+const position = start + Math.floor(signatureHex.length / 2);
+tampered[position] = tampered[position] === 0x41 ? 0x42 : 0x41;
+const attacked = verifyPadesPdf({ pdfBuffer: tampered, expectedFingerprint: fixture.certificateRecord.fingerprint_sha256 });
+printResult({ title: "ATTACK 3 - EMBEDDED PADES CMS SIGNATURE MODIFIED", originalValid: original.valid, attackedValid: attacked.valid, reason: attacked.reason });

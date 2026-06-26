@@ -1,0 +1,13 @@
+# Portable minimal OpenSSL configuration used by the NT219 PoC.
+# It prevents Windows OpenSSL builds from failing when OPENSSL_CONF points to
+# a missing machine-specific file.
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+
+[provider_sect]
+default = default_sect
+
+[default_sect]
+activate = 1

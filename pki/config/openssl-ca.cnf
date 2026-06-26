@@ -1,0 +1,37 @@
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = ../pki/root-ca
+certs             = $dir
+crl_dir           = $dir
+new_certs_dir     = $dir/ca-database/newcerts
+database          = $dir/ca-database/index.txt
+unique_subject    = no
+certificate       = $dir/root-ca.crt
+private_key       = $dir/root-ca.key
+serial            = $dir/root-ca.srl
+crlnumber         = $dir/ca-database/crlnumber
+crl               = $dir/root-ca.crl
+crl_extensions    = crl_ext
+default_crl_days  = 30
+default_md        = sha256
+policy            = policy_any
+x509_extensions   = usr_cert
+copy_extensions   = copy
+
+[ policy_any ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ usr_cert ]
+basicConstraints = critical, CA:false
+keyUsage = critical, digitalSignature
+
+[ crl_ext ]
+authorityKeyIdentifier = keyid:always

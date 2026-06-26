@@ -1,0 +1,15 @@
+import "dotenv/config";
+import { findActiveCertificateByOfficerId } from "../src/services/certificate.repository.js";
+import { generateOcspResponse, verifyOcspResponse } from "../src/crypto/ocsp.service.js";
+const record = findActiveCertificateByOfficerId("OFFICER-001");
+const response = generateOcspResponse({ serialNumber: record.serial_number, certificateId: record.certificate_id });
+const future = new Date(new Date(response.next_update).getTime() + 60_000);
+const checked = verifyOcspResponse({ requestDerBase64: response.request_der_base64, responseDerBase64: response.response_der_base64, now: future });
+const passed = checked.valid === false && checked.reason === "OCSP_RESPONSE_STALE";
+console.log("\n=== ATTACK 13 - STALE OCSP RESPONSE ===");
+console.log("Next update:", response.next_update);
+console.log("Verification time:", future.toISOString());
+console.log("Stale response:", checked.valid ? "ACCEPTED" : "REJECTED");
+console.log("Reason:", checked.reason);
+console.log("Test result:", passed ? "PASS" : "FAIL");
+if (!passed) process.exitCode = 1;

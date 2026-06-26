@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Đăng nhập - Cổng Dịch vụ Hành chính Công
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css?v=20260624-6"
+    >
+</head>
+
+<body class="account-page">
+
+    <!-- HEADER -->
+    <header class="account-header">
+        <div class="account-header-inner">
+
+            <a
+                href="/"
+                class="account-brand"
+                aria-label="Về trang chủ"
+            >
+                <img
+                    src="/assets/images/portal-logo.png"
+                    alt="Biểu trưng Cổng Dịch vụ Hành chính Công"
+                >
+
+                <span class="account-brand-text">
+                    <strong>
+                        Cổng Dịch vụ Hành chính Công
+                    </strong>
+
+                    <small>
+                        Trực tuyến An toàn
+                    </small>
+                </span>
+            </a>
+
+            <nav
+                class="account-header-actions"
+                aria-label="Điều hướng tài khoản"
+            >
+                <a
+                    href="/verify.html"
+                    class="account-top-button account-top-verify"
+                >
+                    Xác minh
+                </a>
+
+                <a
+                    href="/register.html"
+                    class="account-top-button account-top-register"
+                >
+                    Đăng ký
+                </a>
+
+                <a
+                    href="/login.html"
+                    class="account-top-button account-top-login"
+                    aria-current="page"
+                >
+                    Đăng nhập
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- NỘI DUNG -->
+    <main class="account-main">
+        <div class="account-main-inner">
+
+            <section class="account-card">
+
+                <div class="account-card-heading">
+                    <div
+                        class="account-card-icon"
+                        aria-hidden="true"
+                    >
+                        🔐
+                    </div>
+
+                    <div>
+                        <span class="account-card-label">
+                            Tài khoản người dùng
+                        </span>
+
+                        <h1>
+                            Đăng nhập
+                        </h1>
+
+                        <p>
+                            Đăng nhập để nộp hồ sơ, theo dõi kết quả
+                            hoặc xử lý hồ sơ hành chính.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    id="authSuccess"
+                    class="account-alert account-alert-success"
+                    style="display: none;"
+                ></div>
+
+                <div
+                    id="authError"
+                    class="account-alert account-alert-error"
+                    style="display: none;"
+                ></div>
+
+                <form id="loginForm">
+
+                    <div class="account-form-group">
+                        <label for="loginEmail">
+                            Email
+                        </label>
+
+                        <input
+                            id="loginEmail"
+                            type="email"
+                            name="email"
+                            required
+                            autocomplete="email"
+                            placeholder="you@example.com"
+                        >
+                    </div>
+
+                    <div class="account-form-group">
+                        <label for="loginPassword">
+                            Mật khẩu
+                        </label>
+
+                        <input
+                            id="loginPassword"
+                            type="password"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            placeholder="Nhập mật khẩu"
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="account-submit-button"
+                    >
+                        Đăng nhập
+                    </button>
+
+                </form>
+
+                <p class="account-switch-text">
+                    Chưa có tài khoản?
+
+                    <a href="/register.html">
+                        Đăng ký ngay
+                    </a>
+                </p>
+
+                <div class="account-security-note">
+                    <strong>Bảo mật tài khoản:</strong>
+
+                    <span>
+                        Thông tin đăng nhập được sử dụng để xác thực
+                        và phân quyền truy cập hệ thống.
+                    </span>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="account-footer">
+        <div class="account-footer-inner">
+
+            <span>
+                Cơ quan chủ quản: Văn phòng Chính phủ
+            </span>
+
+            <span>
+                www.dichvucong.gov.vn
+            </span>
+
+            <span>
+                Tổng đài hỗ trợ: 18001096
+            </span>
+
+            <span>
+                Email: dichvucong@chinhphu.vn
+            </span>
+
+        </div>
+    </footer>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const registered =
+                new URLSearchParams(window.location.search)
+                    .get("registered");
+
+            if (registered === "1") {
+                const successElement =
+                    document.getElementById("authSuccess");
+
+                successElement.textContent =
+                    "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.";
+
+                successElement.style.display = "block";
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+[ v3_officer ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+basicConstraints = critical, CA:false
+keyUsage = critical, digitalSignature
+extendedKeyUsage = emailProtection, clientAuth
+subjectAltName = email:officer@test.com, URI:urn:nt219:role:officer
+certificatePolicies = 1.3.6.1.4.1.55555.1.1

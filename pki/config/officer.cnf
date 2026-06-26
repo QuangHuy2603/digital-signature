@@ -1,0 +1,20 @@
+[ req ]
+prompt = no
+distinguished_name = dn
+req_extensions = req_ext
+
+[ dn ]
+C = VN
+ST = Ho Chi Minh
+L = Thu Duc
+O = HCMUTE
+OU = Public Administrative Services
+CN = NT219 Demo Officer
+emailAddress = officer@test.com
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+email.1 = officer@test.com
+URI.1 = urn:nt219:role:officer

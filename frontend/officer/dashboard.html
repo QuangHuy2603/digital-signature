@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cán bộ - Cổng Dịch vụ công</title>
+    <link rel="stylesheet" href="/css/style.css?v=20260625-remote-otp-otp">
+</head>
+<body class="dashboard-page officer-dashboard">
+    <header class="dashboard-header">
+        <div class="dashboard-header-inner">
+            <a href="/" class="dashboard-brand" aria-label="Về trang chủ">
+                <img src="/assets/images/portal-logo.png" alt="Biểu trưng Cổng Dịch vụ Hành chính Công">
+                <span class="dashboard-brand-text">
+                    <strong>Cổng Dịch vụ Hành chính Công</strong>
+                    <small>Trực tuyến An toàn</small>
+                </span>
+            </a>
+
+            <nav class="dashboard-nav" aria-label="Điều hướng chính">
+                <a
+                    id="navThutuc"
+                    href="/officer/dashboard.html"
+                    class="active"
+                >
+                    Thủ tục hành chính
+                </a>
+
+                <a href="/certificates.html">
+                    Quản lý chứng thư
+                </a>
+
+                <a href="/verify.html">
+                    Xác minh
+                </a>
+
+                <div id="navAuth"></div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Quản lý hồ sơ</h1>
+        <p class="page-subtitle">Tiếp nhận, xem chi tiết và ký số hồ sơ hành chính của công dân.</p>
+
+        <div id="alertBox" class="alert" style="display:none"></div>
+
+        <div class="card" style="margin-bottom:18px">
+            <div class="card-header">
+                <h2>Phương thức ký số</h2>
+                <button onclick="loadClientAgentStatus()" class="btn btn-sm btn-outline">Kiểm tra Client Agent</button>
+            </div>
+            <div style="padding:16px 24px;display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:18px;align-items:center">
+                <div class="form-group" style="margin:0">
+                    <label for="signingMethodSelect">Chọn phương thức ký</label>
+                    <select id="signingMethodSelect" style="width:100%;padding:10px;border:1px solid var(--gray-300);border-radius:6px">
+                        <option value="remote">Ký từ xa qua TSP + OTP</option>
+                        <option value="local">Ký cục bộ qua Client Agent (phần mềm)</option>
+                    </select>
+                </div>
+                <div id="clientAgentStatus" style="font-size:14px;color:var(--gray-600)">
+                    Ký từ xa yêu cầu OTP dùng một lần. Khi chọn ký cục bộ, hãy chạy Client Agent tại http://127.0.0.1:3500.
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="pending">Chờ duyệt</div>
+            <div class="tab" data-tab="issued">Đã ký</div>
+            <div class="tab" data-tab="rejected">Đã từ chối</div>
+        </div>
+
+        <div id="tab-pending" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Hồ sơ chờ ký số</h2>
+                    <button onclick="loadPending()" class="btn btn-sm btn-outline">Tải lại</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã hồ sơ</th>
+                                <th>Người nộp</th>
+                                <th>Ngày nộp</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingBody">
+                            <tr><td colspan="4" class="empty-state"><p>Đang tải...</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-rejected" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Hồ sơ đã từ chối</h2>
+                    <button onclick="loadRejected()" class="btn btn-sm btn-outline">Tải lại</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã hồ sơ</th>
+                                <th>Người nộp</th>
+                                <th>Ngày từ chối</th>
+                                <th>Lý do</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rejectedBody">
+                            <tr><td colspan="5" class="empty-state"><p>Đang tải...</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-issued" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Hồ sơ đã ký số</h2>
+                    <button onclick="loadIssued()" class="btn btn-sm btn-outline">Tải lại</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã hồ sơ</th>
+                                <th>Người nộp</th>
+                                <th>Ngày ký</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuedBody">
+                            <tr><td colspan="4" class="empty-state"><p>Đang tải...</p></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="rejectModal" class="modal-overlay" style="display:none">
+        <div class="card" style="width:min(95vw,480px)">
+            <div class="card-header">
+                <h2>Từ chối hồ sơ</h2>
+                <button onclick="closeRejectModal()" class="btn btn-sm btn-outline">Đóng</button>
+            </div>
+            <div style="padding:16px 24px;display:flex;flex-direction:column;gap:12px">
+                <p id="rejectDocLabel" style="margin:0;font-size:14px;color:var(--gray-600)"></p>
+                <div class="form-group">
+                    <label>Lý do từ chối <span style="color:#b91c1c">*</span></label>
+                    <textarea id="rejectReasonInput" rows="4" placeholder="Nhập lý do từ chối hồ sơ..." style="resize:vertical"></textarea>
+                </div>
+            </div>
+            <div style="padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;gap:12px;justify-content:flex-end">
+                <button onclick="closeRejectModal()" class="btn btn-outline">Hủy</button>
+                <button onclick="confirmReject()" class="btn" style="background:#b91c1c;color:#fff;border:none;cursor:pointer">Xác nhận từ chối</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal-overlay" style="display:none">
+        <div class="card" style="width:min(95vw,900px);max-height:90vh;display:flex;flex-direction:column">
+            <div class="card-header" style="flex-shrink:0">
+                <h2 id="detailTitle">Chi tiết hồ sơ</h2>
+                <button onclick="closeDetail()" class="btn btn-sm btn-outline">Đóng</button>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:16px">
+                <div id="detailContent"></div>
+                <div>
+                    <div style="font-weight:600;margin-bottom:8px;font-size:14px;color:var(--gray-600)">Xem trước nội dung hồ sơ</div>
+                    <iframe id="pdfPreviewFrame" style="width:100%;height:520px;border:1px solid var(--gray-200);border-radius:6px;background:#f5f5f5"></iframe>
+                </div>
+            </div>
+            <div id="detailActions" style="flex-shrink:0;padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;gap:12px;justify-content:flex-end"></div>
+        </div>
+    </div>
+
+
+    <footer class="dashboard-footer">
+        <div class="dashboard-footer-inner">
+            <span>Cơ quan chủ quản: Văn phòng Chính phủ</span>
+            <span>www.dichvucong.gov.vn</span>
+            <span>Tổng đài hỗ trợ: 18001096</span>
+            <span>Email: dichvucong@chinhphu.vn</span>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        if (!requireRole("officer")) { /* redirect */ } else {
+            updateNav();
+
+            document.querySelectorAll(".tab").forEach(tab => {
+                tab.addEventListener("click", () => {
+                    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+                    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+                    tab.classList.add("active");
+                    document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
+                    if (tab.dataset.tab === "pending") loadPending();
+                    else if (tab.dataset.tab === "issued") loadIssued();
+                    else if (tab.dataset.tab === "rejected") loadRejected();
+                });
+            });
+
+            loadPending();
+            loadClientAgentStatus();
+        }
+
+        async function loadPending() {
+            try {
+                const docs = await apiGet("/app/documents/pending");
+                const tbody = document.getElementById("pendingBody");
+                if (!docs || docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Không có hồ sơ chờ duyệt</p></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = docs.map(doc => `
+                    <tr>
+                        <td><strong>${doc.document_id}</strong></td>
+                        <td>${doc.owner_name || doc.owner_id || "-"}</td>
+                        <td>${new Date(doc.created_at).toLocaleString("vi-VN")}</td>
+                        <td>
+                            <button onclick="viewDoc('${doc.document_id}')" class="btn btn-sm btn-outline">Xem</button>
+                            <button onclick="signDoc('${doc.document_id}')" class="btn btn-sm btn-success">Ký số</button>
+                            <button onclick="openRejectModal('${doc.document_id}')" class="btn btn-sm" style="background:#b91c1c;color:#fff;border:none;cursor:pointer">Từ chối</button>
+                        </td>
+                    </tr>
+                `).join("");
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        async function loadIssued() {
+            try {
+                const docs = await apiGet("/app/documents/issued");
+                const tbody = document.getElementById("issuedBody");
+                if (!docs || docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Chưa có hồ sơ nào đã ký</p></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = docs.map(doc => `
+                    <tr>
+                        <td><strong>${doc.document_id}</strong></td>
+                        <td>${doc.owner_name || doc.owner_id || "-"}</td>
+                        <td>${new Date(doc.signed_at).toLocaleString("vi-VN")}</td>
+                        <td>
+                            <button onclick="viewDoc('${doc.document_id}')" class="btn btn-sm btn-outline">Xem</button>
+                            <button onclick="downloadDocument('${doc.document_id}')" class="btn btn-sm btn-primary">Tải PDF</button>
+                        </td>
+                    </tr>
+                `).join("");
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        async function viewDoc(docId) {
+            try {
+                const doc = await apiGet(`/app/documents/${docId}`);
+                document.getElementById("detailTitle").textContent = `Hồ sơ ${doc.document_id}`;
+                document.getElementById("detailContent").innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-label">Mã hồ sơ</div>
+                        <div class="detail-value">${doc.document_id}</div>
+                        <div class="detail-label">Trạng thái</div>
+                        <div class="detail-value"><span class="badge badge-${doc.status}">${doc.status}</span></div>
+                        <div class="detail-label">Người nộp</div>
+                        <div class="detail-value">${doc.owner_name || doc.owner_id || "-"}</div>
+                        <div class="detail-label">Ngày tạo</div>
+                        <div class="detail-value">${new Date(doc.created_at).toLocaleString("vi-VN")}</div>
+                        ${doc.rejection_reason ? `
+                        <div class="detail-label">Lý do từ chối</div>
+                        <div class="detail-value" style="color:#b91c1c">${doc.rejection_reason}</div>
+                        <div class="detail-label">Ngày từ chối</div>
+                        <div class="detail-value">${doc.rejected_at ? new Date(doc.rejected_at).toLocaleString("vi-VN") : "-"}</div>
+                        ` : ""}
+                        ${doc.signed_at ? `
+                        <div class="detail-label">Ngày ký</div>
+                        <div class="detail-value">${new Date(doc.signed_at).toLocaleString("vi-VN")}</div>
+                        <div class="detail-label">Hash</div>
+                        <div class="detail-value" style="font-size:12px">${doc.file_hash || "-"}</div>
+                        <div class="detail-label">Định dạng chữ ký</div>
+                        <div class="detail-value">${doc.pades_level || doc.algorithm || "-"}</div>
+                        <div class="detail-label">CMS SubFilter</div>
+                        <div class="detail-value">${doc.pades_subfilter || "-"}</div>
+                        <div class="detail-label">CMS SHA-256</div>
+                        <div class="detail-value" style="font-size:11px;word-break:break-all">${doc.pades_cms_sha256 || "-"}</div>
+                        <div class="detail-label">DSS / VRI</div>
+                        <div class="detail-value">${doc.pades_evidence?.dss_present && doc.pades_evidence?.vri_present ? "Đã nhúng và liên kết" : "-"}</div>
+                        <div class="detail-label">Bằng chứng nhúng</div>
+                        <div class="detail-value">${doc.pades_evidence ? `${doc.pades_evidence.embedded_certificate_count || 0} cert · ${doc.pades_evidence.embedded_ocsp_count || 0} OCSP · ${doc.pades_evidence.embedded_crl_count || 0} CRL` : "-"}</div>
+                        <div class="detail-label">Xác minh dài hạn</div>
+                        <div class="detail-value">${doc.pades_evidence?.offline_verification_ready ? "Sẵn sàng" : "-"}</div>
+                        <div class="detail-label">Người ký</div>
+                        <div class="detail-value">${doc.signed_by?.full_name || "-"}</div>
+                        <div class="detail-label">Mã cán bộ</div>
+                        <div class="detail-value">${doc.signed_by?.officer_id || doc.officer_certificate?.officer_id || "-"}</div>
+                        <div class="detail-label">Email cán bộ</div>
+                        <div class="detail-value">${doc.signed_by?.email || doc.officer_certificate?.email || "-"}</div>
+                        <div class="detail-label">Mã chứng thư</div>
+                        <div class="detail-value">${doc.certificate_id || doc.officer_certificate?.certificate_id || "-"}</div>
+                        <div class="detail-label">Chứng thư cán bộ</div>
+                        <div class="detail-value">${doc.officer_certificate?.chain_valid ? "Hợp lệ" : "-"}</div>
+                        <div class="detail-label">Trạng thái hiện tại</div>
+                        <div class="detail-value">${doc.certificate_current_status || "-"}</div>
+                        <div class="detail-label">Lý do thu hồi</div>
+                        <div class="detail-value">${doc.certificate_revocation_reason || "-"}</div>
+                        <div class="detail-label">Chủ thể X.509</div>
+                        <div class="detail-value">${doc.officer_certificate?.subject || "-"}</div>
+                        <div class="detail-label">Cơ quan cấp</div>
+                        <div class="detail-value">${doc.officer_certificate?.issuer || "-"}</div>
+                        <div class="detail-label">Fingerprint SHA-256</div>
+                        <div class="detail-value" style="font-size:11px;word-break:break-all">${doc.officer_certificate?.fingerprint_sha256 || "-"}</div>
+                        <div class="detail-label">Chữ ký định danh</div>
+                        <div class="detail-value">${doc.certificate_signature_algorithm || "-"}</div>
+                        <div class="detail-label">OCSP khi ký</div>
+                        <div class="detail-value">${doc.ocsp_evidence_at_signing?.certificate_status ? String(doc.ocsp_evidence_at_signing.certificate_status).toUpperCase() : "-"}</div>
+                        <div class="detail-label">Nguồn kiểm tra thu hồi</div>
+                        <div class="detail-value">${doc.revocation_source_at_signing || "-"}</div>
+                        <div class="detail-label">Timestamp RFC 3161</div>
+                        <div class="detail-value">${doc.timestamp_evidence?.valid ? "Hợp lệ" : "-"}</div>
+                        <div class="detail-label">Thời gian TSA</div>
+                        <div class="detail-value">${doc.timestamp_evidence?.timestamp ? new Date(doc.timestamp_evidence.timestamp).toLocaleString("vi-VN") : "-"}</div>
+                        <div class="detail-label">Chính sách TSA</div>
+                        <div class="detail-value" style="font-size:11px;word-break:break-all">${doc.timestamp_evidence?.policy_oid || "-"}</div>
+                        <div class="detail-label">Phương thức ký</div>
+                        <div class="detail-value">${doc.signing_method === "local" ? "Ký cục bộ qua Client Agent" : "Ký từ xa qua TSP + OTP"}</div>
+                        <div class="detail-label">Step-up OTP</div>
+                        <div class="detail-value">${doc.remote_otp_required ? "Đã yêu cầu và xác minh" : "Không áp dụng"}</div>
+                        <div class="detail-label">Mã OTP authorization</div>
+                        <div class="detail-value" style="font-size:11px;word-break:break-all">${doc.remote_otp_authorization_id || "-"}</div>
+                        <div class="detail-label">Phiên bản Client Agent</div>
+                        <div class="detail-value">${doc.client_agent_version || "-"}</div>
+                        <div class="detail-label">Chế độ TSP</div>
+                        <div class="detail-value">${doc.tsp_mode ? String(doc.tsp_mode).toUpperCase() : "-"}</div>
+                        <div class="detail-label">Nhà cung cấp khóa</div>
+                        <div class="detail-value">${doc.key_provider ? String(doc.key_provider).toUpperCase() : "-"}</div>
+                        <div class="detail-label">Khóa có thể xuất</div>
+                        <div class="detail-value">${doc.key_exportable === false ? "Không" : doc.key_exportable === true ? "Có (chế độ file demo)" : "-"}</div>
+                        <div class="detail-label">Mã kho LTV</div>
+                        <div class="detail-value" style="font-size:11px;word-break:break-all">${doc.archive_id || "-"}</div>
+                        <div class="detail-label">Kho LTV lúc tạo</div>
+                        <div class="detail-value">${doc.archive_valid_at_creation === true ? "Hợp lệ" : "-"}</div>
+                        <div class="detail-label">Verify URL</div>
+                        <div class="detail-value"><a href="${doc.verify_url}" target="_blank">${doc.verify_url || "-"}</a></div>
+                        ` : ""}
+                    </div>
+                `;
+
+                // Nút hành động trong modal
+                const actions = document.getElementById("detailActions");
+                let actionBtns = `<button onclick="closeDetail()" class="btn btn-sm btn-outline">Đóng</button>`;
+                if (doc.status === "submitted") {
+                    actionBtns += `<button onclick="signDocFromModal('${doc.document_id}')" class="btn btn-sm btn-success">Ký số</button>`;
+                    actionBtns += `<button onclick="closeDetail();openRejectModal('${doc.document_id}')" class="btn btn-sm" style="background:#b91c1c;color:#fff;border:none;cursor:pointer">Từ chối</button>`;
+                }
+                if (doc.status === "issued" && doc.verify_url) {
+                    try {
+                        const token = new URL(doc.verify_url).searchParams.get("token");
+                        if (token) {
+                            const verifyLink = `../verify.html?id=${encodeURIComponent(doc.document_id)}&token=${encodeURIComponent(token)}`;
+                            actionBtns += `<a href="${verifyLink}" target="_blank" class="btn btn-sm btn-outline">Xác minh tài liệu</a>`;
+                        }
+                    } catch (_) {}
+                }
+                actions.innerHTML = actionBtns;
+
+                // Load PDF vào iframe
+                const frame = document.getElementById("pdfPreviewFrame");
+                frame.src = "";
+                document.getElementById("detailModal").style.display = "flex";
+                try {
+                    const pdfUrl = await apiBlobUrl(`/app/documents/${docId}/download`);
+                    frame.src = pdfUrl;
+                } catch (_) {
+                    frame.srcdoc = '<p style="padding:16px;color:#888">Không thể tải xem trước PDF.</p>';
+                }
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        async function loadClientAgentStatus() {
+            const box = document.getElementById("clientAgentStatus");
+            try {
+                const response = await fetch("http://127.0.0.1:3500/health", { method: "GET" });
+                const data = await response.json();
+                if (!response.ok || !data.ready) throw new Error(data.message || "Client Agent chưa sẵn sàng");
+                const certs = Array.isArray(data.certificates) ? data.certificates : [];
+                const readyCerts = certs.filter(item => item.status === "active" && item.certificate_available && item.private_key_available);
+                const providerName = String(data.provider || "software").toUpperCase();
+                box.innerHTML = `<strong style="color:#15803d">Client Agent đã kết nối</strong><br>` +
+                    `Provider: ${providerName} · Phiên bản: ${data.version || "1.0.0"} · Chứng thư sẵn sàng: ${readyCerts.length}`;
+                box.dataset.ready = "true";
+                return data;
+            } catch (error) {
+                box.innerHTML = `<strong style="color:#b91c1c">Client Agent chưa kết nối</strong><br>` +
+                    `Chạy <code>npm.cmd run start:client-agent</code> hoặc <code>npm.cmd run start:all</code>.`;
+                box.dataset.ready = "false";
+                return null;
+            }
+        }
+
+        function selectedSigningMethod() {
+            return document.getElementById("signingMethodSelect")?.value || "remote";
+        }
+
+        async function performProtectedSigning(docId) {
+            const signingMethod = selectedSigningMethod();
+            if (signingMethod === "local") {
+                const status = await loadClientAgentStatus();
+                if (!status?.ready) {
+                    throw new Error("Client Agent chưa chạy hoặc chưa có chứng thư phần mềm sẵn sàng.");
+                }
+                const requestResponse = await apiPost(
+                    `/app/documents/${docId}/signing-request`,
+                    { signing_method: "local" }
+                );
+                const signingRequest = requestResponse.signingRequest;
+                return apiPost(`/app/documents/${docId}/sign`, {
+                    request_id: signingRequest.request_id,
+                    nonce: signingRequest.nonce,
+                    signing_method: "local"
+                });
+            }
+
+            const challengeResponse = await apiPost(
+                `/app/documents/${docId}/remote-signing-authorization`,
+                {}
+            );
+            const signingRequest = challengeResponse.signingRequest;
+            const challenge = challengeResponse.authorization;
+            const demoHint = challenge.demo_otp
+                ? `\n\nOTP demo (chỉ dùng trong lab): ${challenge.demo_otp}`
+                : "";
+            const otp = window.prompt(
+                `Nhập OTP 6 chữ số để ký từ xa hồ sơ ${docId}.${demoHint}`
+            );
+            if (otp === null) {
+                throw new Error("Đã hủy xác nhận OTP.");
+            }
+            const verifyResponse = await apiPost(
+                `/app/documents/${docId}/remote-signing-authorization/verify`,
+                {
+                    authorization_id: challenge.authorization_id,
+                    otp: otp.trim()
+                }
+            );
+            const authorization = verifyResponse.authorization;
+            return apiPost(`/app/documents/${docId}/sign`, {
+                request_id: signingRequest.request_id,
+                nonce: signingRequest.nonce,
+                signing_method: "remote",
+                authorization_id: authorization.authorization_id,
+                authorization_token: authorization.authorization_token
+            });
+        }
+
+        async function signDocFromModal(docId) {
+            if (!confirm(`Xác nhận ký số hồ sơ ${docId}?`)) return;
+            closeDetail();
+            try {
+                const res = await performProtectedSigning(docId);
+                showAlert(
+                    `Ký số thành công bằng ${res.documentInfo.signing_method === "local" ? "Client Agent" : "TSP + OTP"}! Hồ sơ ${res.documentInfo.document_id} đã dùng yêu cầu ký một lần.`,
+                    "success"
+                );
+                loadPending();
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        async function signDoc(docId) {
+            if (!confirm(`Xác nhận ký số hồ sơ ${docId}?`)) return;
+            try {
+                const res = await performProtectedSigning(docId);
+                showAlert(
+                    `Ký số thành công bằng ${res.documentInfo.signing_method === "local" ? "Client Agent" : "TSP + OTP"}! Hồ sơ ${res.documentInfo.document_id} đã dùng yêu cầu ký một lần.`,
+                    "success"
+                );
+                loadPending();
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        function closeDetail() {
+            document.getElementById("detailModal").style.display = "none";
+        }
+
+        async function downloadDocument(docId) {
+            try {
+                const res = await apiFetch(`/app/documents/${docId}/signed-pdf`);
+                if (!res) return;
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    if (data.tampered) {
+                        showAlert("⚠️ Không thể tải xuống: File PDF đã bị sửa đổi sau khi ký số. Vui lòng thông báo với người dân.", "error");
+                    } else {
+                        showAlert(data.message || "Tải xuống thất bại", "error");
+                    }
+                    return;
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${docId}-signed.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        async function loadRejected() {
+            try {
+                const docs = await apiGet("/app/documents/rejected");
+                const tbody = document.getElementById("rejectedBody");
+                if (!docs || docs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Không có hồ sơ nào đã từ chối</p></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = docs.map(doc => `
+                    <tr>
+                        <td><strong>${doc.document_id}</strong></td>
+                        <td>${doc.owner_name || doc.owner_id || "-"}</td>
+                        <td>${doc.rejected_at ? new Date(doc.rejected_at).toLocaleString("vi-VN") : "-"}</td>
+                        <td style="max-width:260px;word-break:break-word">${doc.rejection_reason || "-"}</td>
+                        <td><button onclick="viewDoc('${doc.document_id}')" class="btn btn-sm btn-outline">Xem</button></td>
+                    </tr>
+                `).join("");
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        let pendingRejectDocId = null;
+
+        function openRejectModal(docId) {
+            pendingRejectDocId = docId;
+            document.getElementById("rejectDocLabel").textContent = `Hồ sơ: ${docId}`;
+            document.getElementById("rejectReasonInput").value = "";
+            document.getElementById("rejectModal").style.display = "flex";
+        }
+
+        function closeRejectModal() {
+            document.getElementById("rejectModal").style.display = "none";
+            pendingRejectDocId = null;
+        }
+
+        async function confirmReject() {
+            const reason = document.getElementById("rejectReasonInput").value.trim();
+            if (!reason) {
+                showAlert("Vui lòng nhập lý do từ chối", "error");
+                return;
+            }
+            const docId = pendingRejectDocId;
+            closeRejectModal();
+            try {
+                await apiPost(`/app/documents/${docId}/reject`, { reason });
+                showAlert(`Đã từ chối hồ sơ ${docId}`, "success");
+                loadPending();
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        function showAlert(msg, type) {
+            const el = document.getElementById("alertBox");
+            el.className = `alert alert-${type}`;
+            el.textContent = msg;
+            el.style.display = "block";
+            setTimeout(() => el.style.display = "none", 5000);
+        }
+    </script>
+</body>
+</html>

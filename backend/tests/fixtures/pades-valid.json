@@ -1,0 +1,32 @@
+{
+  "certificate_id": "CERT-OFFICER-001-V1",
+  "fingerprint_sha256": "006786836D44C4235DB866DE9A9E44238728417104F4C76DF2ACC8C6BF531F56",
+  "verification": {
+    "valid": true,
+    "reason": "VALID_PADES_B_T",
+    "format": "PAdES",
+    "baseline_level": "PAdES-B-T",
+    "subfilter": "ETSI.CAdES.detached",
+    "byte_range_valid": true,
+    "byte_range": [
+      0,
+      1362,
+      34132,
+      919
+    ],
+    "cms_signature_valid": true,
+    "cades_signing_certificate_attribute": true,
+    "timestamp_valid": true,
+    "timestamp_reason": "TIMESTAMP_VALID",
+    "timestamp": "2026-06-24T16:53:38.706Z",
+    "timestamp_policy_oid": "1.3.6.1.4.1.55555.1.7.1",
+    "timestamp_serial_number": "0x96ADC7182A1AE28FEDB0C751C8BE71D5",
+    "signer_subject": "C=VN\nST=Ho Chi Minh\nL=Thu Duc\nO=HCMUTE\nOU=Public Administrative Services Officer\nCN=Can bo Nguyen\nUID=OFFICER-001\nemailAddress=officer@test.com",
+    "signer_issuer": "C=VN\nST=Ho Chi Minh\nL=Thu Duc\nO=HCMUTE\nOU=NT219 Cryptography Lab\nCN=NT219 Test Root CA",
+    "signer_serial_number": "7FC87240E774941FCC350B1A58EE911E30FCE70F",
+    "signer_fingerprint_sha256": "006786836D44C4235DB866DE9A9E44238728417104F4C76DF2ACC8C6BF531F56",
+    "signer_valid_from": "Jun 24 13:41:04 2026 GMT",
+    "signer_valid_to": "Sep 26 13:41:04 2028 GMT",
+    "cms_sha256": "1E2048F2F9CCC31523D68157976923E9E02AB9628A3F69C8A3A6AF85D190950E"
+  }
+}

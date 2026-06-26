@@ -1,0 +1,16 @@
+import "dotenv/config";
+import { createTimestampToken, verifyTimestampToken } from "../src/crypto/tsa.service.js";
+const data = Buffer.from("NT219 trusted signature bytes", "utf8");
+const token = createTimestampToken({ dataBuffer: data });
+const original = verifyTimestampToken({ dataBuffer: data, responseDerBase64: token.response_der_base64 });
+const bytes = Buffer.from(token.response_der_base64, "base64");
+bytes[Math.floor(bytes.length / 2)] ^= 0x01;
+const attacked = verifyTimestampToken({ dataBuffer: data, responseDerBase64: bytes.toString("base64") });
+const wrongData = verifyTimestampToken({ dataBuffer: Buffer.from("modified signature", "utf8"), responseDerBase64: token.response_der_base64 });
+const passed = original.valid && !attacked.valid && !wrongData.valid;
+console.log("\n=== ATTACK 15 - TAMPERED RFC3161 TIMESTAMP ===");
+console.log("Original timestamp:", original.valid ? "VALID" : "INVALID");
+console.log("Tampered token:", attacked.valid ? "ACCEPTED" : "REJECTED");
+console.log("Wrong message imprint:", wrongData.valid ? "ACCEPTED" : "REJECTED");
+console.log("Test result:", passed ? "PASS" : "FAIL");
+if (!passed) process.exitCode = 1;

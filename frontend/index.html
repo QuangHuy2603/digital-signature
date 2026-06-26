@@ -1,0 +1,157 @@
+    <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Cổng dịch vụ hành chính công trực tuyến an toàn, hỗ trợ nộp hồ sơ và xác minh tài liệu ký số."
+    >
+
+    <title>
+        Cổng Dịch vụ Hành chính Công Trực tuyến An toàn
+    </title>
+
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body class="home-page">
+
+    <!-- HEADER -->
+    <header class="landing-header">
+        <div class="landing-header-inner">
+
+            <!-- Logo và tên hệ thống -->
+            <a
+                href="./index.html"
+                class="landing-brand"
+                aria-label="Về trang chủ"
+            >
+                <img
+                    src="./assets/images/portal-logo.png"
+                    alt="Biểu trưng Cổng Dịch vụ Hành chính Công"
+                >
+
+                <span class="landing-brand-text">
+                    <strong>
+                        Cổng Dịch vụ Hành chính Công
+                    </strong>
+
+                    <small>
+                        Trực tuyến An toàn
+                    </small>
+                </span>
+            </a>
+
+            <!--
+                Các nút Xác minh, Đăng ký và Đăng nhập
+                được auth.js tự động tạo trong navAuth.
+                Không đặt thêm nút tĩnh ở đây để tránh bị lặp.
+            -->
+            <nav
+                class="landing-actions"
+                aria-label="Điều hướng tài khoản"
+            >
+                <div
+                    id="navAuth"
+                    class="landing-auth"
+                ></div>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="landing-main">
+
+        <section
+            class="landing-hero"
+            aria-labelledby="landing-title"
+        >
+            <div class="landing-hero-inner">
+
+                <div class="landing-copy">
+
+                    <h1 id="landing-title">
+                        Cổng Dịch vụ<br>
+                        Hành chính Công<br>
+                        Trực tuyến An toàn
+                    </h1>
+
+                    <p class="landing-description">
+                        Dịch vụ công trực tuyến nhanh chóng, minh bạch,
+                        bảo mật và an toàn cho mọi công dân.
+                    </p>
+
+                    <!--
+                        Bộ nút dành cho màn hình điện thoại.
+                        Trên máy tính phần này được CSS ẩn,
+                        vì vậy không tạo nút Xác minh bị trùng.
+                    -->
+                    <div
+                        class="landing-mobile-actions"
+                        aria-label="Thao tác nhanh"
+                    >
+                        <a
+                            href="./verify.html"
+                            class="landing-action landing-action-verify"
+                        >
+                            Xác minh
+                        </a>
+
+                        <a
+                            href="./register.html"
+                            class="landing-action landing-action-register"
+                        >
+                            Đăng ký
+                        </a>
+
+                        <a
+                            href="./login.html"
+                            class="landing-action landing-action-login"
+                        >
+                            Đăng nhập
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="landing-footer">
+        <div class="landing-footer-inner">
+
+            <span>
+                Cơ quan chủ quản: Văn phòng Chính phủ
+            </span>
+
+            <span>
+                www.dichvucong.gov.vn
+            </span>
+
+            <span>
+                Tổng đài hỗ trợ: 18001096
+            </span>
+
+            <span>
+                Email: dichvucong@chinhphu.vn
+            </span>
+
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script src="./js/api.js"></script>
+    <script src="./js/auth.js"></script>
+
+</body>
+</html>

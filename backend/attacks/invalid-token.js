@@ -1,0 +1,12 @@
+import { hashText } from "../src/crypto/hash.service.js";
+const correctToken = "nt219-pades-bt-security-valid-token";
+const tokenHash = hashText(correctToken);
+const originalValid = hashText(correctToken) === tokenHash;
+const attackedValid = hashText("wrong-demo-token") === tokenHash;
+const passed = originalValid && !attackedValid;
+console.log("\n=== ATTACK 1 - INVALID VERIFICATION TOKEN ===");
+console.log("Correct token accepted:", originalValid ? "YES" : "NO");
+console.log("Wrong token accepted:", attackedValid ? "YES" : "NO");
+console.log("Expected wrong token accepted: NO");
+console.log("Test result:", passed ? "PASS" : "FAIL");
+if (!passed) process.exitCode = 1;

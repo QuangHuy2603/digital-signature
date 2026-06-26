@@ -1,0 +1,163 @@
+# ============================================================
+# Dependencies
+# ============================================================
+
+node_modules/
+**/node_modules/
+
+# ============================================================
+# Local configuration and secrets
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ============================================================
+# Logs, temporary files and local caches
+# ============================================================
+
+*.log
+*.tmp
+*.bak
+*.backup
+*.old
+*.swp
+
+coverage/
+.nyc_output/
+.cache/
+
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# IDE and assistant state
+# ============================================================
+
+.vscode/
+.idea/
+.kiro/
+.claude/
+
+# ============================================================
+# Backend runtime data
+# ============================================================
+
+backend/src/data/*
+!backend/src/data/.gitkeep
+
+backend/src/uploads/*
+!backend/src/uploads/.gitkeep
+
+backend/src/signed/*
+!backend/src/signed/.gitkeep
+
+backend/storage/documents/*
+!backend/storage/documents/.gitkeep
+
+backend/storage/archive/*
+!backend/storage/archive/.gitkeep
+
+# ============================================================
+# Service runtime storage
+# ============================================================
+
+client-agent/storage/*
+!client-agent/storage/.gitkeep
+
+tsp-service/storage/*
+!tsp-service/storage/.gitkeep
+
+archive-service/storage/*
+!archive-service/storage/.gitkeep
+
+# ============================================================
+# Generated evidence and benchmark results
+# ============================================================
+
+evidence/*
+!evidence/.gitkeep
+
+results/*
+!results/.gitkeep
+
+# ============================================================
+# Generated attack runtime storage
+# ============================================================
+
+**/storage-attack-*/
+
+# ============================================================
+# SoftHSM runtime and machine-specific configuration
+# ============================================================
+
+infrastructure/softhsm/tokens/*
+!infrastructure/softhsm/tokens/.gitkeep
+
+infrastructure/softhsm/softhsm2.conf
+
+# ============================================================
+# Generated PKI files
+# Keep pki/config, pki/scripts and public test fixtures tracked.
+# ============================================================
+
+pki/**/*.key
+pki/**/*.csr
+pki/**/*.crt
+pki/**/*.cer
+pki/**/*.pem
+pki/**/*.der
+pki/**/*.crl
+pki/**/*.srl
+
+pki/**/*.p12
+pki/**/*.pfx
+pki/**/*.p7b
+pki/**/*.p7c
+pki/**/*.p7m
+pki/**/*.p7s
+pki/**/*.tsq
+pki/**/*.tsr
+
+pki/**/metadata.json
+pki/**/*-metadata.json
+pki/**/crlnumber*
+pki/**/serial*
+pki/**/index.txt*
+pki/**/ca-database/*
+
+# Public certificates used by negative tests remain tracked.
+!pki/test-fixtures/**/*.crt
+!pki/test-fixtures/**/*.cer
+!pki/test-fixtures/**/*.pem
+
+# ============================================================
+# Generated PKI runtime directories
+# ============================================================
+
+pki/officers/*
+!pki/officers/.gitkeep
+
+pki/citizens/*
+!pki/citizens/.gitkeep
+
+pki/ocsp/*
+!pki/ocsp/.gitkeep
+
+pki/tsa/*
+!pki/tsa/.gitkeep
+
+pki/archive/*
+!pki/archive/.gitkeep
+
+pki/root-ca/*
+!pki/root-ca/.gitkeep
+
+!pki/root-ca/ca-database/
+pki/root-ca/ca-database/*
+!pki/root-ca/ca-database/.gitkeep

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý chứng thư số</title>
+    <link rel="stylesheet" href="/css/style.css?v=20260625-certificate-lifecycle">
+</head>
+<body class="dashboard-page">
+<header class="dashboard-header"><div class="dashboard-header-inner">
+    <a href="/" class="dashboard-brand"><img src="/assets/images/portal-logo.png" alt="Logo"><span class="dashboard-brand-text"><strong>Cổng Dịch vụ Hành chính Công</strong><small>Quản lý chứng thư số</small></span></a>
+    <nav class="dashboard-nav"><a id="dashboardLink">Trang quản lý</a><a href="/certificates.html" class="active">Chứng thư số</a><a href="/verify.html">Xác minh</a><div id="navAuth"></div></nav>
+</div></header>
+<main class="container">
+    <h1 class="page-title">Quản lý chứng thư số</h1>
+    <p class="page-subtitle">Gửi yêu cầu cấp mới, gia hạn hoặc thu hồi chứng thư. Admin sẽ kiểm tra và xử lý.</p>
+    <div id="alertBox" class="alert" style="display:none"></div>
+    <div class="card" style="margin-bottom:18px">
+        <div class="card-header"><h2>Tạo yêu cầu</h2></div>
+        <form id="requestForm" style="padding:18px 24px">
+            <div class="form-row">
+                <div class="form-group"><label>Loại yêu cầu</label><select id="requestType"><option value="issue">Cấp mới</option><option value="renew">Gia hạn</option><option value="revoke">Thu hồi</option></select></div>
+                <div class="form-group"><label>Provider</label><select id="providerSelect"></select></div>
+            </div>
+            <div class="form-group" id="targetGroup" style="display:none"><label>Chứng thư mục tiêu</label><select id="targetCertificate"></select></div>
+            <div class="form-group" id="reasonGroup" style="display:none"><label>Lý do thu hồi</label><select id="revocationReason"><option value="keyCompromise">Lộ hoặc nghi ngờ lộ khóa</option><option value="superseded">Được thay thế</option><option value="cessationOfOperation">Ngừng sử dụng</option><option value="privilegeWithdrawn">Thu hồi quyền</option><option value="unspecified">Lý do khác</option></select></div>
+            <button class="btn btn-primary" type="submit">Gửi yêu cầu</button>
+        </form>
+    </div>
+    <div class="card" style="margin-bottom:18px"><div class="card-header"><h2>Chứng thư của tôi</h2><button class="btn btn-sm btn-outline" onclick="loadAll()">Tải lại</button></div><div class="table-wrap"><table><thead><tr><th>Mã chứng thư</th><th>Provider</th><th>Trạng thái</th><th>Hiệu lực đến</th></tr></thead><tbody id="certificateBody"></tbody></table></div></div>
+    <div class="card"><div class="card-header"><h2>Lịch sử yêu cầu</h2></div><div class="table-wrap"><table><thead><tr><th>Mã yêu cầu</th><th>Loại</th><th>Provider</th><th>Trạng thái</th><th>Thời gian</th></tr></thead><tbody id="requestBody"></tbody></table></div></div>
+</main>
+<footer class="dashboard-footer"><div class="dashboard-footer-inner"><span>Certificate administration – Quản lý vòng đời chứng thư</span><span>Không sử dụng cơ sở dữ liệu</span></div></footer>
+<script src="/js/api.js"></script><script src="/js/auth.js"></script>
+<script>
+if (!requireRole("citizen", "officer")) throw new Error("Unauthorized");
+const user = getUser();
+const role = user.roles.includes("officer") ? "officer" : "citizen";
+document.getElementById("dashboardLink").href = role === "officer" ? "/officer/dashboard.html" : "/citizen/dashboard.html";
+const providerSelect = document.getElementById("providerSelect");
+providerSelect.innerHTML = role === "officer" ? '<option value="software">Software local</option><option value="softhsm">SoftHSM remote</option>' : '<option value="software">Software lab</option><option value="pkcs11">PKCS#11 token</option>';
+let certificates = [];
+function show(message,type="success"){const e=document.getElementById("alertBox");e.textContent=message;e.className=`alert alert-${type}`;e.style.display="block";}
+function updateForm(){const type=document.getElementById("requestType").value;document.getElementById("targetGroup").style.display=type==="issue"?"none":"block";document.getElementById("reasonGroup").style.display=type==="revoke"?"block":"none";document.getElementById("providerSelect").disabled=type!=="issue";}
+document.getElementById("requestType").addEventListener("change",updateForm);
+async function loadAll(){
+ const certResponse=await apiGet("/app/certificates/me"); certificates=certResponse.data||[];
+ document.getElementById("targetCertificate").innerHTML=certificates.filter(c=>c.status==="active").map(c=>`<option value="${c.certificate_id}">${c.certificate_id} · ${(c.key_provider||c.provider||"software").toUpperCase()}</option>`).join("")||'<option value="">Không có chứng thư đang hoạt động</option>';
+ document.getElementById("certificateBody").innerHTML=certificates.map(c=>`<tr><td><strong>${c.certificate_id}</strong></td><td>${(c.key_provider||c.provider||"software").toUpperCase()}</td><td>${c.status}</td><td>${c.valid_to?new Date(c.valid_to).toLocaleDateString("vi-VN"):"-"}</td></tr>`).join("")||'<tr><td colspan="4" class="empty-state">Chưa có chứng thư</td></tr>';
+ const reqResponse=await apiGet("/app/certificates/requests/my");
+ document.getElementById("requestBody").innerHTML=(reqResponse.data||[]).slice().reverse().map(r=>`<tr><td style="font-size:12px">${r.request_id}</td><td>${r.request_type}</td><td>${r.provider.toUpperCase()}</td><td><strong>${r.status}</strong></td><td>${new Date(r.created_at).toLocaleString("vi-VN")}</td></tr>`).join("")||'<tr><td colspan="5" class="empty-state">Chưa có yêu cầu</td></tr>';
+ updateForm();
+}
+document.getElementById("requestForm").addEventListener("submit",async e=>{e.preventDefault();try{const type=document.getElementById("requestType").value;await apiPost("/app/certificates/requests",{request_type:type,certificate_role:role,provider:providerSelect.value,target_certificate_id:type==="issue"?null:document.getElementById("targetCertificate").value,revocation_reason:type==="revoke"?document.getElementById("revocationReason").value:null});show("Đã gửi yêu cầu chứng thư");await loadAll();}catch(err){show(err.message,"error");}});
+loadAll().catch(err=>show(err.message,"error"));
+</script></body></html>

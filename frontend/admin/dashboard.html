@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin PKI</title>
+    <link rel="stylesheet" href="/css/style.css?v=20260625-certificate-admin">
+</head>
+<body class="dashboard-page">
+<header class="dashboard-header">
+    <div class="dashboard-header-inner">
+        <a href="/" class="dashboard-brand">
+            <img src="/assets/images/portal-logo.png" alt="Logo">
+            <span class="dashboard-brand-text">
+                <strong>Cổng Dịch vụ Hành chính Công</strong>
+                <small>Quản trị PKI</small>
+            </span>
+        </a>
+        <nav class="dashboard-nav">
+            <a href="/admin/dashboard.html" class="active">Quản trị chứng thư</a>
+            <a href="/verify.html">Xác minh</a>
+            <div id="navAuth"></div>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <h1 class="page-title">Quản trị PKI và vòng đời chứng thư</h1>
+    <p class="page-subtitle">
+        ADMIN tích hợp chức năng kiểm tra yêu cầu, quản trị CA và có thể chủ động thu hồi chứng thư khi phát hiện rủi ro.
+    </p>
+
+    <div id="alertBox" class="alert" style="display:none"></div>
+    <div id="overview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px"></div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="requests">Yêu cầu</div>
+        <div class="tab" data-tab="certificates">Chứng thư</div>
+        <div class="tab" data-tab="events">Audit PKI</div>
+    </div>
+
+    <div id="tab-requests" class="tab-content active">
+        <div class="card">
+            <div class="card-header">
+                <h2>Yêu cầu chứng thư</h2>
+                <button onclick="loadAll()" class="btn btn-sm btn-outline">Tải lại</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Yêu cầu</th><th>Chủ thể</th><th>Loại</th><th>Nguồn</th><th>Provider</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <tbody id="requestBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-certificates" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Certificate Registry</h2>
+                    <p style="margin:4px 0 0;color:#64748b;font-size:13px">
+                        Admin có thể thu hồi trực tiếp chứng thư active mà không cần chờ yêu cầu từ chủ sở hữu.
+                    </p>
+                </div>
+                <button onclick="loadAll()" class="btn btn-sm btn-outline">Tải lại</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Mã chứng thư</th><th>Chủ sở hữu</th><th>Provider</th><th>Trạng thái</th><th>Serial</th><th>Thao tác</th></tr></thead>
+                    <tbody id="certificateBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-events" class="tab-content">
+        <div class="card">
+            <div class="card-header"><h2>Nhật ký vòng đời chứng thư</h2></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Thời gian</th><th>Hành động</th><th>Request</th><th>Actor</th><th>Chi tiết</th></tr></thead>
+                    <tbody id="eventBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="revokeModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.58);z-index:9999;align-items:center;justify-content:center;padding:20px">
+    <div class="card" style="width:min(560px,100%);padding:24px;box-shadow:0 20px 60px rgba(15,23,42,.35)">
+        <div style="display:flex;justify-content:space-between;gap:16px;align-items:start">
+            <div>
+                <h2 style="margin:0 0 8px">Admin chủ động thu hồi</h2>
+                <p style="margin:0;color:#64748b">Thao tác này cập nhật Registry, Client Agent, CRL, OCSP và không thể hoàn tác.</p>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick="closeRevokeModal()">Đóng</button>
+        </div>
+        <div class="alert alert-error" style="display:block;margin:18px 0 14px">
+            Không xóa chứng thư. Hệ thống chỉ chuyển trạng thái sang <strong>revoked</strong> để vẫn xác minh được tài liệu đã ký trước đó.
+        </div>
+        <div style="display:grid;gap:12px">
+            <label><strong>Chứng thư</strong><input id="revokeCertificateId" class="form-control" readonly></label>
+            <label><strong>Chủ sở hữu</strong><input id="revokeOwner" class="form-control" readonly></label>
+            <label><strong>Lý do thu hồi</strong>
+                <select id="revokeReason" class="form-control">
+                    <option value="keyCompromise">keyCompromise – nghi ngờ/lộ khóa riêng</option>
+                    <option value="affiliationChanged">affiliationChanged – thay đổi đơn vị/vai trò</option>
+                    <option value="superseded">superseded – đã có chứng thư thay thế</option>
+                    <option value="cessationOfOperation">cessationOfOperation – ngừng sử dụng</option>
+                    <option value="unspecified">unspecified – lý do khác</option>
+                </select>
+            </label>
+            <label><strong>Nhập lại mã chứng thư để xác nhận</strong>
+                <input id="revokeConfirmation" class="form-control" autocomplete="off" placeholder="Nhập chính xác mã chứng thư">
+            </label>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+            <button class="btn btn-outline" onclick="closeRevokeModal()">Hủy</button>
+            <button id="confirmRevokeButton" class="btn btn-danger" onclick="confirmDirectRevoke()">Xác nhận thu hồi</button>
+        </div>
+    </div>
+</div>
+
+<footer class="dashboard-footer">
+    <div class="dashboard-footer-inner">
+        <span>Certificate administration – ADMIN gộp RA + CA + chủ động thu hồi</span>
+        <span>Mọi quyết định được ghi audit log</span>
+    </div>
+</footer>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+if (!requireRole("admin")) throw new Error("Unauthorized");
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function show(message, type = "success") {
+    const element = document.getElementById("alertBox");
+    element.textContent = message;
+    element.className = `alert alert-${type}`;
+    element.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab,.tab-content").forEach((element) => element.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
+}));
+
+async function action(id, type) {
+    try {
+        if (type === "reject") {
+            const reason = prompt("Lý do từ chối:", "Thông tin chưa phù hợp");
+            if (reason === null) return;
+            await apiPost(`/app/certificates/admin/requests/${id}/reject`, { reason });
+        } else {
+            await apiPost(`/app/certificates/admin/requests/${id}/${type}`, {});
+        }
+        show("Đã xử lý yêu cầu");
+        await loadAll();
+    } catch (error) {
+        show(error.message, "error");
+    }
+}
+
+function openRevokeModal(certificateId, owner) {
+    document.getElementById("revokeCertificateId").value = certificateId;
+    document.getElementById("revokeOwner").value = owner;
+    document.getElementById("revokeReason").value = "keyCompromise";
+    document.getElementById("revokeConfirmation").value = "";
+    document.getElementById("revokeModal").style.display = "flex";
+    setTimeout(() => document.getElementById("revokeConfirmation").focus(), 50);
+}
+
+function closeRevokeModal() {
+    document.getElementById("revokeModal").style.display = "none";
+}
+
+async function confirmDirectRevoke() {
+    const certificateId = document.getElementById("revokeCertificateId").value;
+    const confirmation = document.getElementById("revokeConfirmation").value.trim();
+    const reason = document.getElementById("revokeReason").value;
+    if (confirmation !== certificateId) {
+        show("Mã xác nhận không trùng với mã chứng thư.", "error");
+        return;
+    }
+
+    const button = document.getElementById("confirmRevokeButton");
+    button.disabled = true;
+    button.textContent = "Đang thu hồi...";
+    try {
+        const result = await apiPost(`/app/certificates/admin/certificates/${encodeURIComponent(certificateId)}/revoke`, {
+            reason,
+            confirmation,
+        });
+        closeRevokeModal();
+        show(`${result.message}. CRL và OCSP đã được đồng bộ.`);
+        await loadAll();
+    } catch (error) {
+        show(error.message, "error");
+    } finally {
+        button.disabled = false;
+        button.textContent = "Xác nhận thu hồi";
+    }
+}
+
+async function loadAll() {
+    const [overviewResult, requestsResult, certificatesResult, eventsResult] = await Promise.all([
+        apiGet("/app/certificates/admin/overview"),
+        apiGet("/app/certificates/admin/requests"),
+        apiGet("/app/certificates/admin/certificates"),
+        apiGet("/app/certificates/admin/events"),
+    ]);
+
+    const overview = overviewResult.data;
+    document.getElementById("overview").innerHTML = [
+        ["Chờ xử lý", overview.pending_requests],
+        ["Đã duyệt", overview.approved_requests],
+        ["Đã cấp", overview.issued_requests],
+        ["Admin thu hồi trực tiếp", overview.admin_direct_revocations || 0],
+        ["Chứng thư active", overview.active_certificates],
+        ["Chứng thư revoked", overview.revoked_certificates],
+    ].map(([label, value]) => `<div class="card" style="padding:16px"><div style="font-size:13px;color:#64748b">${escapeHtml(label)}</div><div style="font-size:28px;font-weight:700">${escapeHtml(value)}</div></div>`).join("");
+
+    const requests = requestsResult.data || [];
+    document.getElementById("requestBody").innerHTML = requests.slice().reverse().map((request) => {
+        const source = request.request_origin === "admin" ? "ADMIN" : "USER";
+        let actions = "-";
+        if (request.status === "PENDING") {
+            actions = `<button class="btn btn-sm btn-success" onclick="action('${escapeHtml(request.request_id)}','approve')">Duyệt</button> <button class="btn btn-sm btn-outline" onclick="action('${escapeHtml(request.request_id)}','reject')">Từ chối</button>`;
+        } else if (request.status === "APPROVED") {
+            actions = `<button class="btn btn-sm btn-primary" onclick="action('${escapeHtml(request.request_id)}','issue')">${request.request_type === "revoke" ? "Thu hồi" : "Cấp chứng thư"}</button>`;
+        }
+        return `<tr><td style="font-size:11px">${escapeHtml(request.request_id)}</td><td>${escapeHtml(request.subject_id)}</td><td>${escapeHtml(request.request_type)}</td><td>${source}</td><td>${escapeHtml(String(request.provider || "-").toUpperCase())}</td><td><strong>${escapeHtml(request.status)}</strong></td><td>${actions}</td></tr>`;
+    }).join("") || '<tr><td colspan="7" class="empty-state">Chưa có yêu cầu</td></tr>';
+
+    const certificates = certificatesResult.data || [];
+    document.getElementById("certificateBody").innerHTML = certificates.map((certificate) => {
+        const owner = certificate.citizen_id || certificate.officer_id || "-";
+        const status = String(certificate.status || "unknown");
+        const actionButton = status === "active"
+            ? `<button class="btn btn-sm btn-danger" onclick="openRevokeModal('${escapeHtml(certificate.certificate_id)}','${escapeHtml(owner)}')">Thu hồi</button>`
+            : "-";
+        return `<tr><td>${escapeHtml(certificate.certificate_id)}</td><td>${escapeHtml(owner)}</td><td>${escapeHtml(String(certificate.key_provider || certificate.provider || "software").toUpperCase())}</td><td><strong>${escapeHtml(status)}</strong>${certificate.revocation_reason ? `<br><small>${escapeHtml(certificate.revocation_reason)}</small>` : ""}</td><td style="font-size:10px">${escapeHtml(certificate.serial_number || "-")}</td><td>${actionButton}</td></tr>`;
+    }).join("") || '<tr><td colspan="6" class="empty-state">Chưa có chứng thư</td></tr>';
+
+    const events = eventsResult.data || [];
+    document.getElementById("eventBody").innerHTML = events.slice().reverse().map((event) => {
+        const details = event.details || {};
+        const detailText = [details.certificate_id, details.reason, details.request_origin].filter(Boolean).join(" · ") || "-";
+        return `<tr><td>${escapeHtml(new Date(event.created_at).toLocaleString("vi-VN"))}</td><td>${escapeHtml(event.action)}</td><td style="font-size:11px">${escapeHtml(event.request_id || "-")}</td><td>${escapeHtml(event.actor_id || "-")}</td><td style="font-size:11px">${escapeHtml(detailText)}</td></tr>`;
+    }).join("") || '<tr><td colspan="5" class="empty-state">Chưa có audit event</td></tr>';
+}
+
+loadAll().catch((error) => show(error.message, "error"));
+</script>
+</body>
+</html>
