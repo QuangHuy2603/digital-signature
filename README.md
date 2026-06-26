@@ -1,6 +1,6 @@
 # Digital Signature
 
-Nền tảng chữ ký số **PAdES-LT** cho Cổng Dịch vụ Hành chính Công, xây dựng cho đồ án môn **NT219 – Mật mã học**.
+Nền tảng chữ ký số **PAdES-LT** cho Cổng Dịch vụ Hành chính Công, xây dựng cho đồ án môn **NT219 – Mật mã ứng dụng**.
 
 Hệ thống mô phỏng toàn bộ chu trình ký điện tử: công dân ký hồ sơ, cán bộ ký phát hành, ký cục bộ qua Client Agent, ký từ xa qua TSP + OTP + SoftHSM, timestamp RFC 3161, kiểm tra CRL/OCSP, nhúng DSS/VRI vào PDF và quản lý vòng đời chứng thư.
 
